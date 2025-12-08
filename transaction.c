@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "helper.c"
+#include <stdint.h>
+#include <stddef.h>
 
 // https://learnmeabitcoin.com/technical/transaction/
 
@@ -34,12 +36,12 @@ char transaction[200];
 
 struct Inputs
 {
-    char Txid[32]; // transazione da dove vuoi prelevare i BTC
-    char Vout[8];  // quale output della transazione vuoi spendere (perchè ogni transazione può avere più di un output)
-    char ScriptSigSize[3];
-    char Scriptsig[150];
-    char Sequence[9];
-    const char *InputTransaction[300];
+    uint8_t Txid[32];          // transazione da dove vuoi prelevare i BTC
+    uint32_t Vout;             // quale output della transazione vuoi spendere (perchè ogni transazione può avere più di un output)
+    char ScriptSigSize;        // grandezza scipt sig
+    uint8_t *Scriptsig;        // composizione dello scriptsig che serve per spendere l'input
+    uint32_t Sequence;         // quando spendere gli input (settaggio di un tempo)
+    uint8_t *InputTransaction; // composizione degli input
 };
 
 struct Outputs
@@ -58,9 +60,10 @@ struct Wallet
     char privateKey[64];
 };
 
-void TransactionCreation(struct Inputs *input)
-{
-    *input->InputTransaction = "r";
+void TransactionCreation(struct Inputs *input) {
+    //*input->InputTransaction = (const char *)input->Txid;
+    // sprintf(*input->InputTransaction, "%c%c%c%c%c", (const char *)input->Txid, (const char *)input->Vout, input->ScriptSigSize, (const char *)input->Scriptsig, *input->Sequence);
+    // sprintf((char)*input->InputTransaction, "%c", (unsigned char)*input->Txid);
 };
 
 int main()
@@ -73,21 +76,21 @@ int main()
     user_1.amount = 50;
     user_2.amount = 0;
 
-    // da questo address mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia --> a questo address n2jNQhRTHz377juqkNCATovwGAnjmssDNt
-    strcpy(user_1.address, "mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia");
-    strcpy(user_1.publicKey, PUBLICKEY);
-    strcpy(user_1.privateKey, PRIVATEKEY);
-    strcpy(user_2.address, "n2jNQhRTHz377juqkNCATovwGAnjmssDNt");
+    // // da questo address mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia --> a questo address n2jNQhRTHz377juqkNCATovwGAnjmssDNt
+    // strcpy(user_1.address, "mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia");
+    // strcpy(user_1.publicKey, PUBLICKEY);
+    // strcpy(user_1.privateKey, PRIVATEKEY);
+    // strcpy(user_2.address, "n2jNQhRTHz377juqkNCATovwGAnjmssDNt");
 
-    strcpy(inputTransaction.Txid, TRANSACTION);
-    strcpy(inputTransaction.Vout, VOUT);
-    strcpy(inputTransaction.Sequence, SEQUENCE);
-    sprintf(inputTransaction.Scriptsig, "%s%s%s", OP_PUSHBYTES_65, user_1.publicKey, OP_CHECKSIG);
-    snprintf(inputTransaction.ScriptSigSize, sizeof(inputTransaction.ScriptSigSize), "%ld", strlen(inputTransaction.Scriptsig));
+    // strcpy(inputTransaction.Txid, TRANSACTION);
+    // strcpy(inputTransaction.Vout, VOUT);
+    // strcpy(inputTransaction.Sequence, SEQUENCE);
+    // sprintf(inputTransaction.Scriptsig, "%s%s%s", OP_PUSHBYTES_65, user_1.publicKey, OP_CHECKSIG);
+    // snprintf(inputTransaction.ScriptSigSize, sizeof(inputTransaction.ScriptSigSize), "%ld", strlen(inputTransaction.Scriptsig));
 
-    TransactionCreation(&inputTransaction);
-    *user_1.type_address = type_adress(user_1.address);
-    *user_2.type_address = type_adress(user_2.address);
+    // TransactionCreation(&inputTransaction);
+    // *user_1.type_address = type_adress(user_1.address);
+    // *user_2.type_address = type_adress(user_2.address);
     printf("address1 --> %s, type_address -->  %s\n", user_1.address, *user_1.type_address);
     printf("address2 --> %s, type_address -->  %s\n", user_2.address, *user_2.type_address);
     printf("scriptsig --> %s\n", inputTransaction.Scriptsig);
