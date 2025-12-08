@@ -46,9 +46,9 @@ struct Inputs
 
 struct Outputs
 {
-    char Amount[16];
-    char ScriptPubKeySize[2];
-    char ScriptPubKey[50];
+    uint8_t *Amount;
+    uint8_t ScriptPubKeySize;
+    uint8_t *ScriptPubKey;
 };
 
 struct Wallet
@@ -56,8 +56,8 @@ struct Wallet
     char address[34];
     const char *type_address[10];
     int amount;
-    char publicKey[130];
-    char privateKey[64];
+    uint8_t publicKey[130];
+    uint8_t privateKey[64];
 };
 
 void TransactionCreation(struct Inputs *input) {
@@ -65,6 +65,10 @@ void TransactionCreation(struct Inputs *input) {
     // sprintf(*input->InputTransaction, "%c%c%c%c%c", (const char *)input->Txid, (const char *)input->Vout, input->ScriptSigSize, (const char *)input->Scriptsig, *input->Sequence);
     // sprintf((char)*input->InputTransaction, "%c", (unsigned char)*input->Txid);
 };
+
+void scriptSig()
+{
+}
 
 int main()
 {
@@ -77,22 +81,7 @@ int main()
     user_2.amount = 0;
 
     // // da questo address mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia --> a questo address n2jNQhRTHz377juqkNCATovwGAnjmssDNt
-    // strcpy(user_1.address, "mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia");
+    strcpy(user_1.address, "mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia");
+    printf("%s\n", stringToBit(PUBLICKEY));
     // strcpy(user_1.publicKey, PUBLICKEY);
-    // strcpy(user_1.privateKey, PRIVATEKEY);
-    // strcpy(user_2.address, "n2jNQhRTHz377juqkNCATovwGAnjmssDNt");
-
-    // strcpy(inputTransaction.Txid, TRANSACTION);
-    // strcpy(inputTransaction.Vout, VOUT);
-    // strcpy(inputTransaction.Sequence, SEQUENCE);
-    // sprintf(inputTransaction.Scriptsig, "%s%s%s", OP_PUSHBYTES_65, user_1.publicKey, OP_CHECKSIG);
-    // snprintf(inputTransaction.ScriptSigSize, sizeof(inputTransaction.ScriptSigSize), "%ld", strlen(inputTransaction.Scriptsig));
-
-    // TransactionCreation(&inputTransaction);
-    // *user_1.type_address = type_adress(user_1.address);
-    // *user_2.type_address = type_adress(user_2.address);
-    printf("address1 --> %s, type_address -->  %s\n", user_1.address, *user_1.type_address);
-    printf("address2 --> %s, type_address -->  %s\n", user_2.address, *user_2.type_address);
-    printf("scriptsig --> %s\n", inputTransaction.Scriptsig);
-    printf("scriptsig --> %s\n", *inputTransaction.InputTransaction);
 }

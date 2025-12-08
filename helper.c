@@ -1,5 +1,6 @@
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 const char *type_adress(char address[])
 {
@@ -25,4 +26,29 @@ int little_endian(int *value)
         printf("valore --> %d", value[id_hex]);
     }
     return value_change;
+}
+
+char *stringToBit(char secretKey[])
+{
+    if (secretKey == NULL)
+        return 0;
+
+    size_t len = strlen(secretKey);
+    char *bit = malloc(len * 8 + 1); // si alloca la memoria giusta
+    for (int stringId = 0; stringId < strlen(secretKey); stringId++)
+    {
+        char ch = secretKey[stringId];
+        for (int bitId = 7; bitId >= 0; bitId--)
+        {
+            if (ch & (1 << bitId))
+            {
+                strcat(bit, "1");
+            }
+            else
+            {
+                strcat(bit, "0");
+            }
+        }
+    }
+    return bit;
 }
