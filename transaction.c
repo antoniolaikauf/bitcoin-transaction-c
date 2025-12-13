@@ -37,7 +37,7 @@ struct Inputs
 {
     uint8_t Txid[32];          // transazione da dove vuoi prelevare i BTC
     uint8_t Vout[4];           // quale output della transazione vuoi spendere (perchè ogni transazione può avere più di un output)
-    char ScriptSigSize;        // grandezza scipt sig
+    uint8_t ScriptSigSize;     // grandezza scipt sig
     uint8_t *Scriptsig;        // composizione dello scriptsig che serve per spendere l'input
     uint8_t Sequence[4];       // quando spendere gli input (settaggio di un tempo)
     uint8_t *InputTransaction; // composizione degli input
@@ -84,5 +84,7 @@ int main()
     // // da questo address mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia --> a questo address n2jNQhRTHz377juqkNCATovwGAnjmssDNt
     strcpy(user_1.address, "mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia");
     hex_to_bit(TRANSACTION, inputTransaction.Txid);
-    check_value(inputTransaction.Txid, 32);    
+    hex_to_bit(VOUT, inputTransaction.Vout);
+    hex_to_bit(SEQUENCE, inputTransaction.Sequence);
+    check_value(inputTransaction.Txid, 32);
 }
