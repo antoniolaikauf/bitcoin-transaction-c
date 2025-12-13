@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stddef.h>
 
 const char *type_adress(char address[])
 {
@@ -18,37 +20,20 @@ int get_script_sig(int value)
     return script_sig;
 }
 
-int little_endian(int *value)
+void hex_to_bit(const char *Hex, uint8_t *bytes)
 {
-    int value_change = 0;
-    for (int id_hex = 0; id_hex < 8; id_hex++)
+    int lenHex = strlen(Hex) / 2;
+    for (int hexId = 0; hexId < lenHex; hexId++)
     {
-        printf("valore --> %d", value[id_hex]);
+        sscanf(Hex + 2 * hexId, "%2hhx", &bytes[(lenHex - 1) - hexId]); // togliere -1 perchè sforerebbe fuori
     }
-    return value_change;
 }
 
-char *stringToBit(char secretKey[])
+void check_value(const uint8_t *bytes, int len) // Aggiungi len come parametro!
 {
-    if (secretKey == NULL)
-        return 0;
-
-    size_t len = strlen(secretKey);
-    char *bit = malloc(len * 8 + 1); // si alloca la memoria giusta
-    for (int stringId = 0; stringId < strlen(secretKey); stringId++)
+    for (int i = 0; i < len; i++)
     {
-        char ch = secretKey[stringId];
-        for (int bitId = 7; bitId >= 0; bitId--)
-        {
-            if (ch & (1 << bitId))
-            {
-                strcat(bit, "1");
-            }
-            else
-            {
-                strcat(bit, "0");
-            }
-        }
+        printf("%02hhx", bytes[i]);
     }
-    return bit;
+    printf("\n");
 }

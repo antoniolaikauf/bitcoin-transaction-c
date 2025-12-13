@@ -33,14 +33,13 @@ spedire soldi a n2jNQhRTHz377juqkNCATovwGAnjmssDNt
 #define VOUT "01000000"                                                                // indice dell'output che vuoi spendere, in una transazione si possono avere più output, e si possono decidere quale spendere
 
 char transaction[200];
-
 struct Inputs
 {
     uint8_t Txid[32];          // transazione da dove vuoi prelevare i BTC
-    uint32_t Vout;             // quale output della transazione vuoi spendere (perchè ogni transazione può avere più di un output)
+    uint8_t Vout[4];           // quale output della transazione vuoi spendere (perchè ogni transazione può avere più di un output)
     char ScriptSigSize;        // grandezza scipt sig
     uint8_t *Scriptsig;        // composizione dello scriptsig che serve per spendere l'input
-    uint32_t Sequence;         // quando spendere gli input (settaggio di un tempo)
+    uint8_t Sequence[4];       // quando spendere gli input (settaggio di un tempo)
     uint8_t *InputTransaction; // composizione degli input
 };
 
@@ -60,7 +59,9 @@ struct Wallet
     uint8_t privateKey[64];
 };
 
-void TransactionCreation(struct Inputs *input) {
+void TransactionCreationInputs(struct Inputs *input) {
+
+    //*input->Txid = TRANSACTION;
     //*input->InputTransaction = (const char *)input->Txid;
     // sprintf(*input->InputTransaction, "%c%c%c%c%c", (const char *)input->Txid, (const char *)input->Vout, input->ScriptSigSize, (const char *)input->Scriptsig, *input->Sequence);
     // sprintf((char)*input->InputTransaction, "%c", (unsigned char)*input->Txid);
@@ -82,6 +83,6 @@ int main()
 
     // // da questo address mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia --> a questo address n2jNQhRTHz377juqkNCATovwGAnjmssDNt
     strcpy(user_1.address, "mwc6H8nvFqjNJypGSSsQxf6iZEGNHsW6ia");
-    printf("%s\n", stringToBit(PUBLICKEY));
-    // strcpy(user_1.publicKey, PUBLICKEY);
+    hex_to_bit(TRANSACTION, inputTransaction.Txid);
+    check_value(inputTransaction.Txid, 32);    
 }
