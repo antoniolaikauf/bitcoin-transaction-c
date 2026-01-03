@@ -52,3 +52,32 @@ void bit_to_hex(struct Word *bits)
         // printf("value --> %c, value in int --> %d\n", hex_value, int_hex);
     }
 }
+
+/*void fill_zeros( bit, int len, char type)
+{
+    if (strcmp('LE', type) == 0)
+    {
+
+    }
+}*/
+
+uint8_t **chunks(struct Word word, int chunk_length)
+{
+    int amount_chunks = (word.length * 8) / chunk_length; // calcolo quanti bit è composta la word
+
+    uint8_t **chunks_bit = (uint8_t **)calloc(amount_chunks + 1, sizeof(uint8_t *)); // creazione di una matrice
+
+    for (int id_chunk = 0; id_chunk < amount_chunks; id_chunk++)
+    {
+        chunks_bit[id_chunk] = (uint8_t *)calloc(chunk_length + 1, sizeof(uint8_t)); // allocazione di ogni array di chunk
+
+        // printf("chunk --> %ld \n\n", amount_chunks);
+        for (int id_bit = 0; id_bit < chunk_length; id_bit++)
+        {
+            chunks_bit[id_chunk][id_bit] = word.bit[id_bit + (id_chunk * chunk_length)]; // allocazione di ogni array
+            // printf("bit_id --> %d, bit --> %d \n", id_bit + (id_chunk * chunk_length), chunks_bit[id_chunk][id_bit]);
+        }
+    }
+
+    return chunks_bit;
+}

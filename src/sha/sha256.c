@@ -15,7 +15,18 @@ int main()
     bit_to_hex(&result);
     for (size_t i = 0; i < result.hex_length; i++)
     {
-        printf("valore --> %c \n", result.hex_value[i]);
+        // printf("valore --> %c \n", result.hex_value[i]);
+    }
+
+    uint8_t **chunks_bits = chunks(result, 8);
+
+    for (size_t i = 0; i < 2; i++)
+    {
+        // printf("chunk --> %ld \n", i);
+        for (size_t x = 0; x < 8; x++)
+        {
+            // printf("bit --> %d \n", chunks_bits[i][x]);
+        }
     }
 
     return 0;
