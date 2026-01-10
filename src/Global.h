@@ -11,4 +11,7 @@ struct Word
 
     size_t hex_length;
     char *hex_value;
+
+    uint8_t **chunks_bits;
 };
+
