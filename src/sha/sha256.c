@@ -34,15 +34,29 @@ int main()
     }
 
     // lunghezza in bit
-    uint8_t message_len_bit[8];
-    for (long int id_bit = 0; id_bit < 64; id_bit++)
+    uint8_t message_len_bit[64];
+    for (int id_bit = 0; id_bit < 64; id_bit++)
     {
         unsigned long long val = ((unsigned long long)1) << id_bit;
-        message_len_bit[id_bit] = ((int)result.length * 8) & val ? 1 : 0;
+        message_len_bit[id_bit] = (unsigned long long)(result.length * 8) & val ? 1 : 0;
         printf("message_len_bit[id_bit] --> %d\n", message_len_bit[id_bit]);
     }
 
-    chunks(&result, 512);
+    little_endian(message_len_bit, 64);
+
+    /*if (((int)result.length * 8) < 448)
+    {
+        chunks(&result, 512);
+    }
+    else if ((448 < ((int)result.length * 8)) && (((int)result.length * 8) < 512))
+    {
+        chunks(&result, 1024);
+        // intermedio
+    }
+    else
+    {
+        chunks(&result, 512);
+    }*/
 
     for (int i = 0; i < 1; i++)
     {
