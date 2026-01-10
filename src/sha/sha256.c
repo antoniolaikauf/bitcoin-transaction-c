@@ -32,7 +32,7 @@ int main()
         // printf("valore --> %c \n", result.hex_value[i]);
     }
 
-    chunks(&result, 8);
+    chunks(&result, 512);
 
     for (int i = 0; i < 2; i++)
     {
@@ -41,7 +41,6 @@ int main()
         {
            printf("bit --> %d \n", result.chunks_bits[i][x]);
         }
-    }
-
+    }    
     return 0;
 }
