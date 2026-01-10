@@ -1,12 +1,13 @@
 #include "../helper.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 /* The values are the first 32 bits of the fractional parts of the square roots of the first 8 primes.
  es. sqrt(2) --> si prende la parte frazionaria (i numeri dopo la virgola) --> la si moltiplica per 2**32 --> trasformazione in esadecimale
 */
 
-uint32_t Hash[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
+uint32_t Hash[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 
 /*
 first 32 bits of the fractional parts of the cubic roots of the first 64 prime numbers.
@@ -32,15 +33,24 @@ int main()
         // printf("valore --> %c \n", result.hex_value[i]);
     }
 
+    // lunghezza in bit
+    uint8_t message_len_bit[8];
+    for (long int id_bit = 0; id_bit < 64; id_bit++)
+    {
+        unsigned long long val = ((unsigned long long)1) << id_bit;
+        message_len_bit[id_bit] = ((int)result.length * 8) & val ? 1 : 0;
+        printf("message_len_bit[id_bit] --> %d\n", message_len_bit[id_bit]);
+    }
+
     chunks(&result, 512);
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 1; i++)
     {
-         //printf("chunk --> %ld \n", i);
-        for (int  x = 0; x < 8; x++)
+        // printf("chunk --> %ld \n", i);
+        for (int x = 0; x < 512; x++)
         {
-           printf("bit --> %d \n", result.chunks_bits[i][x]);
+            // printf("bit --> %d \n", result.chunks_bits[i][x]);
         }
-    }    
+    }
     return 0;
 }

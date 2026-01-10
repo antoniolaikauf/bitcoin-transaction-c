@@ -6,12 +6,11 @@
 #include "Global.h"
 
 void padding(uint8_t bits[], int length_bit_words, int max_length)
-{
-    printf("entro\n");
+{    
     for (int id_fake_bit = length_bit_words; id_fake_bit < max_length; id_fake_bit++)
     {
         bits[id_fake_bit] = 0;
-        printf("indice id_fake_bit --> %d, valore bits[id_fake_bit] --> %d \n", id_fake_bit, bits[id_fake_bit]);
+        //printf("indice id_fake_bit --> %d, valore bits[id_fake_bit] --> %d \n", id_fake_bit, bits[id_fake_bit]);
     }
 }
 
@@ -77,12 +76,12 @@ void chunks(struct Word *word, int chunk_length)
     {
         word->chunks_bits[id_chunk] = (uint8_t *)calloc(chunk_length + 1, sizeof(uint8_t)); // allocazione di ogni array di chunk
 
-        printf("chunk --> %d \n\n", amount_chunks);
+        //printf("chunk --> %d \n\n", amount_chunks);
         for (int id_bit = 0; id_bit < true_bit_words; id_bit++)
         {
             word->chunks_bits[id_chunk][id_bit] = word->bit[id_bit + (id_chunk * chunk_length)]; // allocazione di ogni array
 
-            printf("bit_id --> %d, bit --> %d \n", id_bit + (id_chunk * chunk_length), word->chunks_bits[id_chunk][id_bit]);
+            //printf("bit_id --> %d, bit --> %d \n", id_bit + (id_chunk * chunk_length), word->chunks_bits[id_chunk][id_bit]);
         }
         if (true_bit_words < chunk_length)
         {
