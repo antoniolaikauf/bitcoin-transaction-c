@@ -42,7 +42,6 @@ int main()
         printf("message_len_bit[id_bit] --> %d\n", message_len_bit[id_bit]);
     }
 
-    printf("start   result.length_bit --> %d\n", result.length_bit);
     padding(&result.bit, 448, result.length_bit);
 
     for (int i = 0; i < 448; i++)
@@ -50,12 +49,12 @@ int main()
         printf("result.bit --> %d\n", result.bit[i]);
     }
 
-    printf("end\n");
-    little_endian(message_len_bit, 64);
+    // little_endian(message_len_bit, 64);
+    //  add at the end a 1 bit
+    result.bit[result.length_bit] = 1;
 
     if (result.length_bit < 448)
     {
-
         chunks(&result, 512);
     }
     else if ((448 < result.length_bit) && (result.length_bit < 512))

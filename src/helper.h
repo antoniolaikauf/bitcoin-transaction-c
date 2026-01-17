@@ -14,23 +14,23 @@ void padding(uint8_t **bits, int max_length, int start_len)
 
 struct Word char_to_bit(const char *string)
 {
-    struct Word len_word_bit;
-    len_word_bit.length = strlen(string);
-    len_word_bit.length_bit = strlen(string) * 8;
-    len_word_bit.bit = (uint8_t *)calloc(len_word_bit.length, sizeof(uint8_t));
+    struct Word word;
+    word.length = strlen(string);
+    word.length_bit = strlen(string) * 8;
+    word.bit = (uint8_t *)calloc(word.length, sizeof(uint8_t));
 
-    for (int char_id = 0; char_id < len_word_bit.length; char_id++)
+    for (int char_id = 0; char_id < word.length; char_id++)
     {
         char ch = string[char_id];
         for (int id_bit = 7; id_bit >= 0; id_bit--)
         {
             size_t index = (char_id * 8) + (7 - id_bit);            // indice
-            len_word_bit.bit[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
-            // printf("%d\n", len_word_bit.bit[(char_id * 8) + (7 - id_bit)]);
+            word.bit[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
+            // printf("%d\n", word.bit[(char_id * 8) + (7 - id_bit)]);
         }
         // printf("\n");
     }
-    return len_word_bit;
+    return word;
 }
 
 void bit_to_hex(struct Word *bits)
