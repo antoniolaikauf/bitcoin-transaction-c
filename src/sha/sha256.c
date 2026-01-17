@@ -20,7 +20,7 @@ int main()
     const char *test = "XO";
     struct Word result = char_to_bit(test);
 
-    for (size_t i = 0; i < result.length * 8; i++)
+    for (size_t i = 0; i < result.length_bit; i++)
     {
         if (i % 8 == 0)
             printf("\n");
@@ -38,17 +38,27 @@ int main()
     for (int id_bit = 0; id_bit < 64; id_bit++)
     {
         unsigned long long val = ((unsigned long long)1) << id_bit;
-        message_len_bit[id_bit] = (unsigned long long)(result.length * 8) & val ? 1 : 0;
+        message_len_bit[id_bit] = (unsigned long long)result.length_bit & val ? 1 : 0;
         printf("message_len_bit[id_bit] --> %d\n", message_len_bit[id_bit]);
     }
 
+    printf("start   result.length_bit --> %d\n", result.length_bit);
+    padding(&result.bit, 448, result.length_bit);
+
+    for (int i = 0; i < 448; i++)
+    {
+        printf("result.bit --> %d\n", result.bit[i]);
+    }
+
+    printf("end\n");
     little_endian(message_len_bit, 64);
 
-    /*if (((int)result.length * 8) < 448)
+    if (result.length_bit < 448)
     {
+
         chunks(&result, 512);
     }
-    else if ((448 < ((int)result.length * 8)) && (((int)result.length * 8) < 512))
+    else if ((448 < result.length_bit) && (result.length_bit < 512))
     {
         chunks(&result, 1024);
         // intermedio
@@ -56,7 +66,7 @@ int main()
     else
     {
         chunks(&result, 512);
-    }*/
+    }
 
     for (int i = 0; i < 1; i++)
     {

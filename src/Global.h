@@ -6,12 +6,15 @@
 
 struct Word
 {
-    uint8_t *bit;
-    size_t length;
+    uint8_t *bit; // bit della parola trasformata
+    int length_bit;
 
-    size_t hex_length;
-    char *hex_value;
+    size_t length; // lunghezza della parola
 
-    uint8_t **chunks_bits;
+    size_t hex_length; // lunghezza esadecimale
+    char *hex_value; // valore esadecimale
+
+    uint8_t **chunks_bits; // blocchi di bit
+
 };
 

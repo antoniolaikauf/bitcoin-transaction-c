@@ -5,19 +5,18 @@
 #include <stddef.h>
 #include "Global.h"
 
-void padding(uint8_t bits[], int length_bit_words, int max_length)
+void padding(uint8_t **bits, int max_length, int start_len)
 {
-    for (int id_fake_bit = length_bit_words; id_fake_bit < max_length; id_fake_bit++)
-    {
-        bits[id_fake_bit] = 0;
-        // printf("indice id_fake_bit --> %d, valore bits[id_fake_bit] --> %d \n", id_fake_bit, bits[id_fake_bit]);
-    }
+    uint8_t *old_bits = *bits;
+    *bits = (uint8_t *)calloc(max_length, sizeof(uint8_t));
+    memcpy(*bits, old_bits, start_len);
 }
 
 struct Word char_to_bit(const char *string)
 {
     struct Word len_word_bit;
     len_word_bit.length = strlen(string);
+    len_word_bit.length_bit = strlen(string) * 8;
     len_word_bit.bit = (uint8_t *)calloc(len_word_bit.length, sizeof(uint8_t));
 
     for (int char_id = 0; char_id < len_word_bit.length; char_id++)
@@ -64,8 +63,8 @@ void bit_to_hex(struct Word *bits)
 
 void chunks(struct Word *word, int chunk_length)
 {
-    int amount_chunks = (word->length * 8) / chunk_length; // calcolo quanti bit è composta la word
-    int true_bit_words = (word->length * 8);               // quantità corretta di bit delle parole
+    int amount_chunks = word->length_bit / chunk_length; // calcolo quanti bit è composta la word
+    int true_bit_words = word->length_bit;               // quantità corretta di bit delle parole
 
     if (amount_chunks == 0)
         amount_chunks = 1;
@@ -92,7 +91,7 @@ void little_endian(uint8_t *array_bit, int len)
     for (int id_bit = 0; id_bit < (len / 2); id_bit++)
     {
         uint8_t value_to_swap = array_bit[id_bit];
-        array_bit[id_bit] = array_bit[len -1 - id_bit];
+        array_bit[id_bit] = array_bit[len - 1 - id_bit];
         array_bit[len - 1 - id_bit] = value_to_swap;
     }
 }
