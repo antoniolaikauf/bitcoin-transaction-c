@@ -42,20 +42,19 @@ int main()
         printf("message_len_bit[id_bit] --> %d\n", message_len_bit[id_bit]);
     }
 
-    padding(&result.bit, 448, result.length_bit);
-
-    for (int i = 0; i < 448; i++)
-    {
-        printf("result.bit --> %d\n", result.bit[i]);
-    }
-
     // little_endian(message_len_bit, 64);
     //  add at the end a 1 bit
-    result.bit[result.length_bit] = 1;
 
+    uint8_t *bits_padding;
     if (result.length_bit < 448)
     {
-        chunks(&result, 512);
+        bits_padding = padding(result.bit, 448, result.length_bit);
+        bits_padding[result.length_bit] = 1;
+        little_endian(bits_padding, 448);
+
+        result.process_message_bit = (uint8_t *)calloc(512, sizeof(uint8_t));
+        memcpy(result.process_message_bit, bits_padding, 448);
+        memcpy(result.process_message_bit + 488, message_len_bit, 64);
     }
     else if ((448 < result.length_bit) && (result.length_bit < 512))
     {
@@ -65,6 +64,11 @@ int main()
     else
     {
         chunks(&result, 512);
+    }
+
+    for (int i = 0; i < 512; i++)
+    {
+        printf("result.process_message_bit --> %d\n", result.process_message_bit[i]);
     }
 
     for (int i = 0; i < 1; i++)

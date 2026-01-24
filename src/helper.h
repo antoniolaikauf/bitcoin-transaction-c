@@ -5,11 +5,11 @@
 #include <stddef.h>
 #include "Global.h"
 
-void padding(uint8_t **bits, int max_length, int start_len)
+uint8_t *padding(uint8_t *bits, int max_length, int amount)
 {
-    uint8_t *old_bits = *bits;
-    *bits = (uint8_t *)calloc(max_length, sizeof(uint8_t));
-    memcpy(*bits, old_bits, start_len);
+    uint8_t *bits_pad = (uint8_t *)calloc(max_length, sizeof(uint8_t));
+    memcpy(bits_pad, bits, amount);
+    return bits_pad;
 }
 
 struct Word char_to_bit(const char *string)
@@ -24,7 +24,7 @@ struct Word char_to_bit(const char *string)
         char ch = string[char_id];
         for (int id_bit = 7; id_bit >= 0; id_bit--)
         {
-            size_t index = (char_id * 8) + (7 - id_bit);            // indice
+            size_t index = (char_id * 8) + (7 - id_bit);    // indice
             word.bit[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
             // printf("%d\n", word.bit[(char_id * 8) + (7 - id_bit)]);
         }
@@ -90,8 +90,8 @@ void little_endian(uint8_t *array_bit, int len)
 {
     for (int id_bit = 0; id_bit < (len / 2); id_bit++)
     {
-        uint8_t value_to_swap = array_bit[id_bit];
+        uint8_t tmp = array_bit[id_bit];
         array_bit[id_bit] = array_bit[len - 1 - id_bit];
-        array_bit[len - 1 - id_bit] = value_to_swap;
+        array_bit[len - 1 - id_bit] = tmp;
     }
 }

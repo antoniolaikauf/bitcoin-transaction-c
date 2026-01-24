@@ -12,9 +12,9 @@ struct Word
     size_t length; // lunghezza della parola
 
     size_t hex_length; // lunghezza esadecimale
-    char *hex_value; // valore esadecimale
+    char *hex_value;   // valore esadecimale
 
     uint8_t **chunks_bits; // blocchi di bit
 
+    uint8_t *process_message_bit; // bit processo del messaggio
 };
-
