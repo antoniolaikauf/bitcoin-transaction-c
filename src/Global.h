@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define LOW 448
+#define MEDIUM 512
+#define HIGH 1024
+#define LENGTH_MESSAGE 64
+
+
 struct Word
 {
     uint8_t *bit; // bit della parola trasformata

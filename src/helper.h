@@ -64,23 +64,23 @@ void bit_to_hex(struct Word *bits)
 void chunks(struct Word *word, int chunk_length)
 {
     int amount_chunks = word->length_bit / chunk_length; // calcolo quanti bit è composta la word
-    int true_bit_words = word->length_bit;               // quantità corretta di bit delle parole
+    // int true_bit_words = word->length_bit;               // quantità corretta di bit delle parole
 
     if (amount_chunks == 0)
         amount_chunks = 1;
 
-    word->chunks_bits = (uint8_t **)calloc(amount_chunks + 1, sizeof(uint8_t *)); // creazione di una matrice
+    word->chunks_bits = (uint8_t **)calloc(amount_chunks, sizeof(uint8_t *)); // creazione di una matrice
 
     for (int id_chunk = 0; id_chunk < amount_chunks; id_chunk++)
     {
         word->chunks_bits[id_chunk] = (uint8_t *)calloc(chunk_length + 1, sizeof(uint8_t)); // allocazione di ogni array di chunk
 
-        // printf("chunk --> %d \n\n", amount_chunks);
-        for (int id_bit = 0; id_bit < true_bit_words; id_bit++)
+        printf("chunk --> %d \n\n", amount_chunks);
+        for (int id_bit = 0; id_bit < chunk_length; id_bit++)
         {
-            word->chunks_bits[id_chunk][id_bit] = word->bit[id_bit + (id_chunk * chunk_length)]; // allocazione di ogni array
+            word->chunks_bits[id_chunk][id_bit] = word->process_message_bit[id_bit + (id_chunk * chunk_length)]; // allocazione di ogni array
 
-            // printf("bit_id --> %d, bit --> %d \n", id_bit + (id_chunk * chunk_length), word->chunks_bits[id_chunk][id_bit]);
+            printf("bit_id --> %d, bit --> %d \n", id_bit + (id_chunk * chunk_length), word->chunks_bits[id_chunk][id_bit]);
         }
     }
 }

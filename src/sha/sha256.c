@@ -34,8 +34,8 @@ int main()
     }
 
     // lunghezza in bit
-    uint8_t message_len_bit[64];
-    for (int id_bit = 0; id_bit < 64; id_bit++)
+    uint8_t message_len_bit[LENGTH_MESSAGE];
+    for (int id_bit = 0; id_bit < LENGTH_MESSAGE; id_bit++)
     {
         unsigned long long val = ((unsigned long long)1) << id_bit;
         message_len_bit[id_bit] = (unsigned long long)result.length_bit & val ? 1 : 0;
@@ -43,32 +43,61 @@ int main()
     }
 
     // little_endian(message_len_bit, 64);
-    //  add at the end a 1 bit
+    // add at the end a 1 bit
+    /*
+        1 si aggiungono tot bot 0 in base a quanto sono lunghi i bit della parola che si
+          sta processando
+        2 si aggiunge 1 nella posizione di result.length_bit
+        3 si fa il processo di little_eldian
+        4 si uniscono i bit con il padding con il messaggio della lunghezza
+        5 si dividono in chunks
+    */
 
     uint8_t *bits_padding;
-    if (result.length_bit < 448)
+    if (result.length_bit < LOW)
     {
-        bits_padding = padding(result.bit, 448, result.length_bit);
+        printf("minore di 448\n");
+        bits_padding = padding(result.bit, LOW, result.length_bit);
         bits_padding[result.length_bit] = 1;
-        little_endian(bits_padding, 448);
+        little_endian(bits_padding, LOW);
 
-        result.process_message_bit = (uint8_t *)calloc(512, sizeof(uint8_t));
-        memcpy(result.process_message_bit, bits_padding, 448);
-        memcpy(result.process_message_bit + 488, message_len_bit, 64);
+        result.process_message_bit = (uint8_t *)calloc(MEDIUM, sizeof(uint8_t));
+        memcpy(result.process_message_bit, bits_padding, LOW);
+        memcpy(result.process_message_bit + LOW, message_len_bit, LENGTH_MESSAGE);
+        chunks(&result, MEDIUM);
     }
-    else if ((448 < result.length_bit) && (result.length_bit < 512))
+    else if ((LOW <= result.length_bit) && (result.length_bit <= MEDIUM))
     {
-        chunks(&result, 1024);
-        // intermedio
+        printf("minore di 512\n");
+        bits_padding = padding(result.bit, HIGH, result.length_bit);
+        bits_padding[result.length_bit] = 1;
+        little_endian(bits_padding, HIGH);
+
+        result.process_message_bit = (uint8_t *)calloc(HIGH, sizeof(uint8_t));
+        memcpy(result.process_message_bit, bits_padding, (HIGH - LENGTH_MESSAGE));
+        memcpy(result.process_message_bit + (HIGH - LENGTH_MESSAGE), message_len_bit, LENGTH_MESSAGE);
+
+        chunks(&result, MEDIUM);
     }
     else
     {
-        chunks(&result, 512);
+        printf("minore maggiore\n");
+        int length = result.length_bit;
+        while ((length + LENGTH_MESSAGE) % MEDIUM != 0)
+            length++;
+        bits_padding = padding(result.bit, length, result.length_bit);
+        bits_padding[result.length_bit] = 1;
+
+        result.process_message_bit = (uint8_t *)calloc(LENGTH_MESSAGE + length, sizeof(uint8_t));
+        memcpy(result.process_message_bit, bits_padding, length);
+        memcpy(result.process_message_bit + length, message_len_bit, LENGTH_MESSAGE);
+
+        chunks(&result, MEDIUM);
     }
 
     for (int i = 0; i < 512; i++)
     {
-        printf("result.process_message_bit --> %d\n", result.process_message_bit[i]);
+        // printf("result.process_message_bit --> %d\n", result.process_message_bit[i]);
     }
 
     for (int i = 0; i < 1; i++)
