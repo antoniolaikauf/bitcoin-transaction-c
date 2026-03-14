@@ -149,16 +149,20 @@ int main()
     printf("quantità di chunk --> %d\n", result.Num_of_chunks);
     for (int id_chunk = 0; id_chunk < result.Num_of_chunks; id_chunk++)
     {
-        uint32_t Words[16];
-        memcpy(Words, result.chunks_bits, sizeof(result.chunks_bits));
-        
-        for (int i = 0; i < 16; i++)
+        uint32_t Words[64][32];
+        memset(Words, 0, sizeof(Words));
+        //  si copia i primi 16 word
+        //  si aggiungono 48 words contenenti 0 bit
+
+        for (int id_words = 0; id_words < 64; id_words++)
         {
-            for (size_t t = 0; t < 32; t++)
+            for (int id_words_bit = 0; id_words_bit < 32; id_words_bit++)
             {
-                // printf("%u", (Words[i] >> t) & 1);
+                if (id_words < 16)
+                    Words[id_words][id_words_bit] = result.chunks_bits[id_chunk][(id_words * 32) + id_words_bit];
+                printf("%d", Words[id_words][id_words_bit]);
             }
-            // printf("words --> %d\n", i);
+            printf(" words --> %d\n", id_words);
         }
     }
 
