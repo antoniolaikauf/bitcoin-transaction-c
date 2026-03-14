@@ -9,7 +9,6 @@
 #define HIGH 1024
 #define LENGTH_MESSAGE 64
 
-
 struct Word
 {
     uint8_t *bit; // bit della parola trasformata
@@ -21,6 +20,9 @@ struct Word
     char *hex_value;   // valore esadecimale
 
     uint8_t **chunks_bits; // blocchi di bit
+    int Num_of_chunks;
 
     uint8_t *process_message_bit; // bit processo del messaggio
 };
+
+// perchè fatto uint_8 i chunks

@@ -71,6 +71,8 @@ void chunks(struct Word *word, int chunk_length)
     if (amount_chunks == 0)
         amount_chunks = 1;
 
+    word->Num_of_chunks = amount_chunks;
+
     word->chunks_bits = (uint8_t **)calloc(amount_chunks, sizeof(uint8_t *)); // creazione di una matrice
 
     for (int id_chunk = 0; id_chunk < amount_chunks; id_chunk++)
@@ -80,7 +82,7 @@ void chunks(struct Word *word, int chunk_length)
         // printf("chunk --> %d \n\n", amount_chunks);
         for (int id_bit = 0; id_bit < chunk_length; id_bit++)
         {
-            word->chunks_bits[id_chunk][id_bit] = word->process_message_bit[id_bit + (id_chunk * chunk_length)]; // allocazione di ogni array
+            word->chunks_bits[id_chunk][id_bit] = word->process_message_bit[id_bit + (id_chunk * chunk_length)];
 
             //  printf("bit_id --> %d, bit --> %d \n", id_bit + (id_chunk * chunk_length), word->chunks_bits[id_chunk][id_bit]);
         }
@@ -92,9 +94,7 @@ void hex_to_bit(uint32_t Hex, uint32_t Memory[])
     for (int id_hex = 0; id_hex < 32; id_hex++)
     {
         Memory[id_hex] = ((Hex >> id_hex) & 1);
-        printf("%u", Memory[id_hex]);
     }
-    printf("\n");
 }
 
 // swap importanza di bit in little endian quindi il bit meno significativo si trova a destra
