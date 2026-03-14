@@ -87,14 +87,14 @@ void chunks(struct Word *word, int chunk_length)
     }
 }
 
-uint32_t *hex_to_bit(uint32_t Hex)
+void hex_to_bit(uint32_t Hex, uint32_t Memory[])
 {
-    uint32_t *Bit_hex = (uint32_t *)calloc(32, sizeof(uint32_t));
     for (int id_hex = 0; id_hex < 32; id_hex++)
     {
-        Bit_hex[id_hex] = ((Hex >> id_hex) & 1);
+        Memory[id_hex] = ((Hex >> id_hex) & 1);
+        printf("%u", Memory[id_hex]);
     }
-    return Bit_hex;
+    printf("\n");
 }
 
 // swap importanza di bit in little endian quindi il bit meno significativo si trova a destra
