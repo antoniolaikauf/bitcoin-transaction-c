@@ -87,6 +87,16 @@ void chunks(struct Word *word, int chunk_length)
     }
 }
 
+uint32_t *hex_to_bit(uint32_t Hex)
+{
+    uint32_t *Bit_hex = (uint32_t *)calloc(32, sizeof(uint32_t));
+    for (int id_hex = 0; id_hex < 32; id_hex++)
+    {
+        Bit_hex[id_hex] = ((Hex >> id_hex) & 1);
+    }
+    return Bit_hex;
+}
+
 // swap importanza di bit in little endian quindi il bit meno significativo si trova a destra
 void little_endian(uint8_t *array_bit, int len)
 {
