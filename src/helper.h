@@ -108,22 +108,32 @@ void little_endian(uint8_t *array_bit, int len)
     }
 }
 
-bool if_(int i, int y, int z)
+int if_(int i, int y, int z)
 {
     return (i == 1) ? y : z;
 }
 
-bool XOR_(int i, int j)
+int XOR_(int i, int j)
 {
     return if_(i, if_(j, 0, 1), j);
 }
 
-bool XORXOR_(int i, int j, int l)
+int XORXOR_(int i, int j, int l)
 {
     return XOR_(i, XOR_(j, l));
 }
 
-bool maj(int i, int j, int k)
+uint32_t *XORXOR_ARRAY(uint32_t i_array[], uint32_t j_array[], uint32_t l_array[], int length)
+{
+    uint32_t *ret = (uint32_t *)calloc(length, sizeof(uint32_t));
+    for (int id_array = 0; id_array < length; id_array++)
+    {
+        ret[id_array] = XORXOR_(i_array[id_array], j_array[id_array], l_array[id_array]);
+    }
+    return ret;
+}
+
+int maj(int i, int j, int k)
 {
     /*
         tra i j e k si vede tra i e j quale tra essi il suo
@@ -133,4 +143,40 @@ bool maj(int i, int j, int k)
         valore di i è quello che compare di più
     */
     return ((i == k) && (i != j)) ? i : j;
+}
+
+uint32_t *rotr_arr(uint32_t array[], int index, int length)
+{
+    uint32_t *ret = (uint32_t *)calloc(length, sizeof(uint32_t));
+    uint32_t *first_half = (uint32_t *)calloc((length - index), sizeof(uint32_t));
+    uint32_t *second_half = (uint32_t *)calloc((index), sizeof(uint32_t));
+
+    memcpy(first_half, array, (length - index) * sizeof(uint32_t));
+    memcpy(second_half, array + (length - index), index * sizeof(uint32_t));
+
+    printf("test\n");
+    for (size_t i = 0; i < (length - index); i++)
+    {
+        printf("%u", first_half[i]);
+    }
+
+    printf("\ntest2\n");
+    for (size_t i = 0; i < index; i++)
+    {
+        printf("%u", second_half[i]);
+    }
+
+    memcpy(ret, second_half, index * sizeof(uint32_t));
+    memcpy(ret + index, first_half, (length - index) * sizeof(uint32_t));
+
+    printf("\ntest 3\n");
+    for (size_t i = 0; i < length; i++)
+    {
+        printf("%u", ret[i]);
+    }
+    return ret;
+}
+
+void shift_arr(int index, uint32_t array[])
+{
 }
