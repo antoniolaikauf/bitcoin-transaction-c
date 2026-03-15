@@ -91,7 +91,7 @@ void chunks(struct Word *word, int chunk_length)
 
 void hex_to_bit(uint32_t Hex, uint32_t Memory[])
 {
-    for (int id_hex = 0; id_hex < 32; id_hex++)
+    for (int id_hex = 0; id_hex < LENGTH_WORDS_SHA256; id_hex++)
     {
         Memory[id_hex] = ((Hex >> id_hex) & 1);
     }

@@ -8,6 +8,7 @@
 #define MEDIUM 512
 #define HIGH 1024
 #define LENGTH_MESSAGE 64
+#define LENGTH_WORDS_SHA256 32
 
 struct Word
 {
