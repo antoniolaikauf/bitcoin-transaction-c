@@ -165,11 +165,16 @@ int main()
             printf(" words --> %d\n", id_words);
         }
 
-        uint32_t *test = rotr_arr(Words[15], 5, 32);
-
         for (int id = 16; id < 64; id++)
         {
-            // uint32_t s0 = XORXOR_ARRAY(rotr_arr(Words[id - 15], 7), rotr_arr(Words[id - 15], 18), rotr_arr(Words[id - 15], 3), 32);
+            uint32_t *test = rotr_arr(Words[id - 15], 7, 32);
+            for (size_t i = 0; i < 32; i++)
+            {
+                printf("%u", test[i]);
+            }
+            printf("\n");
+
+            // uint32_t *s0 = XORXOR_ARRAY(rotr_arr(Words[id - 15], 7, 32), rotr_arr(Words[id - 15], 18, 32), rotr_arr(Words[id - 15], 3, 32), 32);
         }
     }
 

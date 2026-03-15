@@ -147,12 +147,15 @@ int maj(int i, int j, int k)
 
 uint32_t *rotr_arr(uint32_t array[], int index, int length)
 {
+
     uint32_t *ret = (uint32_t *)calloc(length, sizeof(uint32_t));
     uint32_t *first_half = (uint32_t *)calloc((length - index), sizeof(uint32_t));
     uint32_t *second_half = (uint32_t *)calloc((index), sizeof(uint32_t));
 
     memcpy(first_half, array, (length - index) * sizeof(uint32_t));
     memcpy(second_half, array + (length - index), index * sizeof(uint32_t));
+
+    /*
 
     printf("test\n");
     for (size_t i = 0; i < (length - index); i++)
@@ -165,15 +168,23 @@ uint32_t *rotr_arr(uint32_t array[], int index, int length)
     {
         printf("%u", second_half[i]);
     }
+    */
 
     memcpy(ret, second_half, index * sizeof(uint32_t));
     memcpy(ret + index, first_half, (length - index) * sizeof(uint32_t));
 
+    /*
     printf("\ntest 3\n");
     for (size_t i = 0; i < length; i++)
     {
         printf("%u", ret[i]);
     }
+    printf("\n");
+
+    */
+    free(first_half);
+    free(second_half);
+
     return ret;
 }
 
