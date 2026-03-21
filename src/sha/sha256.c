@@ -16,9 +16,9 @@ radice cubica(2) --> si prende la parte frazionaria (i numeri dopo la virgola) -
 uint32_t Key[64] = {0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 uint32_t Key_bit[64][LENGTH_WORDS_SHA256];
 
-uint8_t *adder(uint8_t *list1, uint8_t *list2, int len)
+uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 {
-    uint8_t *sums = (uint8_t *)calloc(len, sizeof(int));
+    uint32_t *sums = (uint32_t *)calloc(len, sizeof(uint32_t));
     for (int id_int = 0; id_int < len; id_int++)
     {
         sums[id_int] = id_int;
@@ -28,9 +28,9 @@ uint8_t *adder(uint8_t *list1, uint8_t *list2, int len)
 
     for (int id_bit = (len - 1); id_bit > -1; id_bit--)
     {
-        sums[id_bit] = (uint8_t)XORXOR_(list1[id_bit], list2[id_bit], c);
-        printf("sums[id_bit] --> %d, c --> %d, XORXOR_(list1[id_bit], list2[id_bit], c) --> %d\n", sums[id_bit], c, XORXOR_(list1[id_bit], list2[id_bit], c));
+        sums[id_bit] = (uint32_t)XORXOR_(list1[id_bit], list2[id_bit], c);
         c = maj(list1[id_bit], list2[id_bit], c);
+        // printf("numero bit --> %d     sums[id_bit] --> %d      c --> %d\n", id_bit, sums[id_bit], c);
     }
 
     return sums;
@@ -39,6 +39,7 @@ uint8_t *adder(uint8_t *list1, uint8_t *list2, int len)
 int main()
 {
     const char *test = "hello world";
+    char out[65] = {0};
 
     struct Word result = char_to_bit(test);
 
@@ -177,10 +178,84 @@ int main()
             printf("\n");
             */
 
-            uint32_t *s0 = XORXOR_ARRAY(rotr_arr(Words[id - 15], 7, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 15], 18, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 15], 3, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
-            uint32_t *s1 = XORXOR_ARRAY(rotr_arr(Words[id - 2], 17, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 2], 19, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 2], 10, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *s0 = XORXOR_ARRAY(rotr_arr(Words[id - 15], 7, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 15], 18, LENGTH_WORDS_SHA256), shift_arr_right(Words[id - 15], 3), LENGTH_WORDS_SHA256);
+            uint32_t *s1 = XORXOR_ARRAY(rotr_arr(Words[id - 2], 17, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 2], 19, LENGTH_WORDS_SHA256), shift_arr_right(Words[id - 2], 10), LENGTH_WORDS_SHA256);
+            uint32_t *W = adder(adder(adder(Words[id - 16], s0, LENGTH_WORDS_SHA256), Words[id - 7], LENGTH_WORDS_SHA256), s1, LENGTH_WORDS_SHA256);
+            memcpy(Words[id], W, sizeof(uint32_t) * LENGTH_WORDS_SHA256);
         }
+
+        uint32_t *A = Hash_bit[0];
+        uint32_t *B = Hash_bit[1];
+        uint32_t *C = Hash_bit[2];
+        uint32_t *D = Hash_bit[3];
+        uint32_t *E = Hash_bit[4];
+        uint32_t *F = Hash_bit[5];
+        uint32_t *G = Hash_bit[6];
+        uint32_t *H = Hash_bit[7];
+
+        for (int j = 0; j < 64; j++)
+        {
+            uint32_t *S1 = XORXOR_ARRAY(rotr_arr(E, 6, LENGTH_WORDS_SHA256), rotr_arr(E, 11, LENGTH_WORDS_SHA256), rotr_arr(E, 25, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *ch = XOR_ARRAY(AND_ARRAY(E, F), AND_ARRAY(NOT_ARRAY(E), G));
+            uint32_t *temp1 = adder(adder(adder(adder(H, S1, LENGTH_WORDS_SHA256), ch, LENGTH_WORDS_SHA256), Key_bit[j], LENGTH_WORDS_SHA256), Words[j], LENGTH_WORDS_SHA256);
+            uint32_t *S0 = XORXOR_ARRAY(rotr_arr(A, 2, LENGTH_WORDS_SHA256), rotr_arr(A, 13, LENGTH_WORDS_SHA256), rotr_arr(A, 22, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *m = XORXOR_ARRAY(AND_ARRAY(A, B), AND_ARRAY(A, C), AND_ARRAY(B, C), LENGTH_WORDS_SHA256);
+            uint32_t *temp2 = adder(S0, m, LENGTH_WORDS_SHA256);
+
+            memcpy(H, G, sizeof(uint32_t) * 32);
+            memcpy(G, F, sizeof(uint32_t) * 32);
+            memcpy(F, E, sizeof(uint32_t) * 32);
+
+            memcpy(E, adder(D, temp1, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+
+            memcpy(D, C, sizeof(uint32_t) * 32);
+            memcpy(C, B, sizeof(uint32_t) * 32);
+            memcpy(B, A, sizeof(uint32_t) * 32);
+
+            memcpy(A, adder(temp1, temp2, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        }
+
+        memcpy(Hash_bit[0], adder(Hash_bit[0], A, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[1], adder(Hash_bit[1], B, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[2], adder(Hash_bit[2], C, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[3], adder(Hash_bit[3], D, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[4], adder(Hash_bit[4], E, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[5], adder(Hash_bit[5], F, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[6], adder(Hash_bit[6], G, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[7], adder(Hash_bit[7], H, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
     }
+
+    int hex_index = 0;
+    for (int id_h = 0; id_h < 8; id_h++)
+    {
+        printf("words number --> %d\n", id_h);
+        int int_hex = 0;
+        char hex_value;
+        for (int id_h_bit = 0; id_h_bit < 32; id_h_bit++)
+        {
+            printf("%u", Hash_bit[id_h][id_h_bit]);
+            if (Hash_bit[id_h][id_h_bit])
+            {
+                int_hex |= (1 << (3 - (id_h_bit % 4)));
+            }
+
+            if ((id_h_bit % 4) == 3)
+            {
+                hex_value = (int_hex < 10) ? ('0' + int_hex) : ('a' + int_hex);
+                out[hex_index] = hex_value;
+                hex_index++;
+                int_hex = 0;
+            }
+        }
+        printf("\n\n");
+    }
+
+    // === HEX COMPLETO ALLA FINE (dopo tutti i bit) ===
+    for (int i = 0; i < 64; i++) // 8 caratteri hex per word
+        printf("%c", out[i]);
+    printf("\n\n");
 
     return 0;
 }
+
+// b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9

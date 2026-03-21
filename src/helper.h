@@ -118,6 +118,17 @@ int XOR_(int i, int j)
     return if_(i, if_(j, 0, 1), j);
 }
 
+uint32_t *XOR_ARRAY(uint32_t i_array[], uint32_t j_array[])
+{
+    uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
+    for (int id = 0; id < 32; id++)
+    {
+        ret[id] = XOR_(i_array[id], j_array[id]);
+    }
+
+    return ret;
+}
+
 int XORXOR_(int i, int j, int l)
 {
     return XOR_(i, XOR_(j, l));
@@ -130,6 +141,38 @@ uint32_t *XORXOR_ARRAY(uint32_t i_array[], uint32_t j_array[], uint32_t l_array[
     {
         ret[id_array] = XORXOR_(i_array[id_array], j_array[id_array], l_array[id_array]);
     }
+    return ret;
+}
+
+int AND(int i, int j)
+{
+    return if_(i, j, 0);
+}
+
+uint32_t *AND_ARRAY(uint32_t i_array[], uint32_t j_array[])
+{
+    uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
+    for (int id = 0; id < 32; id++)
+    {
+        ret[id] = AND(i_array[id], j_array[id]);
+    }
+
+    return ret;
+}
+
+int NOT_(int i)
+{
+    return if_(i, 0, 1);
+}
+
+uint32_t *NOT_ARRAY(uint32_t i_array[])
+{
+    uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
+    for (int id = 0; id < 32; id++)
+    {
+        ret[id] = NOT_(i_array[id]);
+    }
+
     return ret;
 }
 
@@ -188,6 +231,10 @@ uint32_t *rotr_arr(uint32_t array[], int index, int length)
     return ret;
 }
 
-void shift_arr(int index, uint32_t array[])
+uint32_t *shift_arr_right(uint32_t array[], int index)
 {
+    uint32_t *ret = (uint32_t *)calloc(32, sizeof(uint32_t) * 32);
+    memcpy(ret + index, array, (32 - index) * sizeof(uint32_t));
+
+    return ret;
 }
