@@ -19,10 +19,6 @@ uint32_t Key_bit[64][LENGTH_WORDS_SHA256];
 uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 {
     uint32_t *sums = (uint32_t *)calloc(len, sizeof(uint32_t));
-    for (int id_int = 0; id_int < len; id_int++)
-    {
-        sums[id_int] = id_int;
-    }
 
     int c = 0;
 
@@ -138,14 +134,14 @@ int main()
             // printf("%u", Key_bit[id_K][i]);
         }
     }
-
     for (int id_h = 0; id_h < 8; id_h++)
     {
         hex_to_bit(Hash[id_h], Hash_bit[id_h]);
         for (size_t i = 0; i < LENGTH_WORDS_SHA256; i++)
         {
-            // printf("%u", Hash_bit[id_h][i]);
+            printf("%u", Hash_bit[id_h][i]);
         }
+        printf("\n");
     }
 
     printf("quantità di chunk --> %d\n", result.Num_of_chunks);
@@ -161,15 +157,14 @@ int main()
             for (int id_words_bit = 0; id_words_bit < LENGTH_WORDS_SHA256; id_words_bit++)
             {
                 Words[id_words][id_words_bit] = result.chunks_bits[id_chunk][(id_words * LENGTH_WORDS_SHA256) + id_words_bit];
-                printf("%d", Words[id_words][id_words_bit]);
+                // printf("%d", Words[id_words][id_words_bit]);
             }
-            printf(" words --> %d\n", id_words);
+            // printf(" words --> %d\n", id_words);
         }
 
         for (int id = 16; id < 64; id++)
         {
             /*
-
             uint32_t *test = rotr_arr(Words[id - 15], 7, LENGTH_WORDS_SHA256);
             for (size_t i = 0; i < LENGTH_WORDS_SHA256; i++)
             {
@@ -184,45 +179,47 @@ int main()
             memcpy(Words[id], W, sizeof(uint32_t) * LENGTH_WORDS_SHA256);
         }
 
-        uint32_t *A = Hash_bit[0];
-        uint32_t *B = Hash_bit[1];
-        uint32_t *C = Hash_bit[2];
-        uint32_t *D = Hash_bit[3];
-        uint32_t *E = Hash_bit[4];
-        uint32_t *F = Hash_bit[5];
-        uint32_t *G = Hash_bit[6];
-        uint32_t *H = Hash_bit[7];
+        uint32_t a[32], b[32], c[32], d[32], e[32], f[32], g[32], h[32];
+
+        memcpy(a, Hash_bit[0], sizeof(uint32_t) * 32);
+        memcpy(b, Hash_bit[1], sizeof(uint32_t) * 32);
+        memcpy(c, Hash_bit[2], sizeof(uint32_t) * 32);
+        memcpy(d, Hash_bit[3], sizeof(uint32_t) * 32);
+        memcpy(e, Hash_bit[4], sizeof(uint32_t) * 32);
+        memcpy(f, Hash_bit[5], sizeof(uint32_t) * 32);
+        memcpy(g, Hash_bit[6], sizeof(uint32_t) * 32);
+        memcpy(h, Hash_bit[7], sizeof(uint32_t) * 32);
 
         for (int j = 0; j < 64; j++)
         {
-            uint32_t *S1 = XORXOR_ARRAY(rotr_arr(E, 6, LENGTH_WORDS_SHA256), rotr_arr(E, 11, LENGTH_WORDS_SHA256), rotr_arr(E, 25, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
-            uint32_t *ch = XOR_ARRAY(AND_ARRAY(E, F), AND_ARRAY(NOT_ARRAY(E), G));
-            uint32_t *temp1 = adder(adder(adder(adder(H, S1, LENGTH_WORDS_SHA256), ch, LENGTH_WORDS_SHA256), Key_bit[j], LENGTH_WORDS_SHA256), Words[j], LENGTH_WORDS_SHA256);
-            uint32_t *S0 = XORXOR_ARRAY(rotr_arr(A, 2, LENGTH_WORDS_SHA256), rotr_arr(A, 13, LENGTH_WORDS_SHA256), rotr_arr(A, 22, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
-            uint32_t *m = XORXOR_ARRAY(AND_ARRAY(A, B), AND_ARRAY(A, C), AND_ARRAY(B, C), LENGTH_WORDS_SHA256);
+            uint32_t *S1 = XORXOR_ARRAY(rotr_arr(e, 6, LENGTH_WORDS_SHA256), rotr_arr(e, 11, LENGTH_WORDS_SHA256), rotr_arr(e, 25, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *ch = XOR_ARRAY(AND_ARRAY(e, f), AND_ARRAY(NOT_ARRAY(e), g));
+            uint32_t *temp1 = adder(adder(adder(adder(h, S1, LENGTH_WORDS_SHA256), ch, LENGTH_WORDS_SHA256), Key_bit[j], LENGTH_WORDS_SHA256), Words[j], LENGTH_WORDS_SHA256);
+            uint32_t *S0 = XORXOR_ARRAY(rotr_arr(a, 2, LENGTH_WORDS_SHA256), rotr_arr(a, 13, LENGTH_WORDS_SHA256), rotr_arr(a, 22, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *m = XORXOR_ARRAY(AND_ARRAY(a, b), AND_ARRAY(a, c), AND_ARRAY(b, c), LENGTH_WORDS_SHA256);
             uint32_t *temp2 = adder(S0, m, LENGTH_WORDS_SHA256);
 
-            memcpy(H, G, sizeof(uint32_t) * 32);
-            memcpy(G, F, sizeof(uint32_t) * 32);
-            memcpy(F, E, sizeof(uint32_t) * 32);
+            memcpy(h, g, sizeof(uint32_t) * 32);
+            memcpy(g, f, sizeof(uint32_t) * 32);
+            memcpy(f, e, sizeof(uint32_t) * 32);
 
-            memcpy(E, adder(D, temp1, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+            memcpy(e, adder(d, temp1, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
 
-            memcpy(D, C, sizeof(uint32_t) * 32);
-            memcpy(C, B, sizeof(uint32_t) * 32);
-            memcpy(B, A, sizeof(uint32_t) * 32);
+            memcpy(d, c, sizeof(uint32_t) * 32);
+            memcpy(c, b, sizeof(uint32_t) * 32);
+            memcpy(b, a, sizeof(uint32_t) * 32);
 
-            memcpy(A, adder(temp1, temp2, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+            memcpy(a, adder(temp1, temp2, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
         }
 
-        memcpy(Hash_bit[0], adder(Hash_bit[0], A, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
-        memcpy(Hash_bit[1], adder(Hash_bit[1], B, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
-        memcpy(Hash_bit[2], adder(Hash_bit[2], C, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
-        memcpy(Hash_bit[3], adder(Hash_bit[3], D, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
-        memcpy(Hash_bit[4], adder(Hash_bit[4], E, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
-        memcpy(Hash_bit[5], adder(Hash_bit[5], F, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
-        memcpy(Hash_bit[6], adder(Hash_bit[6], G, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
-        memcpy(Hash_bit[7], adder(Hash_bit[7], H, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[0], adder(Hash_bit[0], a, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[1], adder(Hash_bit[1], b, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[2], adder(Hash_bit[2], c, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[3], adder(Hash_bit[3], d, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[4], adder(Hash_bit[4], e, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[5], adder(Hash_bit[5], f, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[6], adder(Hash_bit[6], g, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+        memcpy(Hash_bit[7], adder(Hash_bit[7], h, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
     }
 
     int hex_index = 0;
@@ -241,7 +238,7 @@ int main()
 
             if ((id_h_bit % 4) == 3)
             {
-                hex_value = (int_hex < 10) ? ('0' + int_hex) : ('a' + int_hex);
+                hex_value = (int_hex < 10) ? ('0' + int_hex) : ('a' + (int_hex - 10));
                 out[hex_index] = hex_value;
                 hex_index++;
                 int_hex = 0;
@@ -250,11 +247,9 @@ int main()
         printf("\n\n");
     }
 
-    // === HEX COMPLETO ALLA FINE (dopo tutti i bit) ===
     for (int i = 0; i < 64; i++) // 8 caratteri hex per word
         printf("%c", out[i]);
     printf("\n\n");
-
     return 0;
 }
 
