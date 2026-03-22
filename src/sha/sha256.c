@@ -24,7 +24,7 @@ uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 
     for (int id_bit = (len - 1); id_bit > -1; id_bit--)
     {
-        sums[id_bit] = (uint32_t)XORXOR_(list1[id_bit], list2[id_bit], c);
+        sums[id_bit] = (list1[id_bit] + ((list2[id_bit] + c) % 2)) % 2;
         c = maj(list1[id_bit], list2[id_bit], c);
         // printf("numero bit --> %d     sums[id_bit] --> %d      c --> %d\n", id_bit, sums[id_bit], c);
     }
@@ -35,21 +35,10 @@ uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 int main()
 {
     const char *test = "hello world";
-    char out[65] = {0};
 
-    struct Word result = char_to_bit(test);
+    struct Word_sha256 result = char_to_bit(test);
 
-    for (size_t i = 0; i < result.length_bit; i++)
-    {
-        // if (i % 8 == 0)
-        // printf("\n");
-        // printf("%u \n", result.bit[i]);
-    }
     bit_to_hex(&result);
-    for (size_t i = 0; i < result.hex_length; i++)
-    {
-        // printf("valore --> %c \n", result.hex_value[i]);
-    }
 
     // lunghezza in bit
     uint8_t message_len_bit[LENGTH_MESSAGE];
@@ -112,39 +101,16 @@ int main()
         chunks(&result, MEDIUM);
     }
 
-    for (int i = 0; i < 512; i++)
-    {
-        // printf("result.process_message_bit --> %d\n", result.process_message_bit[i]);
-    }
-
-    for (int i = 0; i < 1; i++)
-    {
-        // printf("chunk --> %d", i);
-        for (int x = 0; x < 512; x++)
-        {
-            // printf("%d", result.chunks_bits[i][x]);
-        }
-    }
-
     for (int id_K = 0; id_K < 64; id_K++)
     {
         hex_to_bit(Key[id_K], Key_bit[id_K]);
-        for (size_t i = 0; i < LENGTH_WORDS_SHA256; i++)
-        {
-            // printf("%u", Key_bit[id_K][i]);
-        }
     }
+
     for (int id_h = 0; id_h < 8; id_h++)
     {
         hex_to_bit(Hash[id_h], Hash_bit[id_h]);
-        for (size_t i = 0; i < LENGTH_WORDS_SHA256; i++)
-        {
-            printf("%u", Hash_bit[id_h][i]);
-        }
-        printf("\n");
     }
 
-    printf("quantità di chunk --> %d\n", result.Num_of_chunks);
     for (int id_chunk = 0; id_chunk < result.Num_of_chunks; id_chunk++)
     {
         uint32_t Words[64][LENGTH_WORDS_SHA256];
@@ -164,15 +130,6 @@ int main()
 
         for (int id = 16; id < 64; id++)
         {
-            /*
-            uint32_t *test = rotr_arr(Words[id - 15], 7, LENGTH_WORDS_SHA256);
-            for (size_t i = 0; i < LENGTH_WORDS_SHA256; i++)
-            {
-                printf("%u", test[i]);
-            }
-            printf("\n");
-            */
-
             uint32_t *s0 = XORXOR_ARRAY(rotr_arr(Words[id - 15], 7, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 15], 18, LENGTH_WORDS_SHA256), shift_arr_right(Words[id - 15], 3), LENGTH_WORDS_SHA256);
             uint32_t *s1 = XORXOR_ARRAY(rotr_arr(Words[id - 2], 17, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 2], 19, LENGTH_WORDS_SHA256), shift_arr_right(Words[id - 2], 10), LENGTH_WORDS_SHA256);
             uint32_t *W = adder(adder(adder(Words[id - 16], s0, LENGTH_WORDS_SHA256), Words[id - 7], LENGTH_WORDS_SHA256), s1, LENGTH_WORDS_SHA256);
@@ -225,12 +182,10 @@ int main()
     int hex_index = 0;
     for (int id_h = 0; id_h < 8; id_h++)
     {
-        printf("words number --> %d\n", id_h);
         int int_hex = 0;
         char hex_value;
         for (int id_h_bit = 0; id_h_bit < 32; id_h_bit++)
         {
-            printf("%u", Hash_bit[id_h][id_h_bit]);
             if (Hash_bit[id_h][id_h_bit])
             {
                 int_hex |= (1 << (3 - (id_h_bit % 4)));
@@ -239,18 +194,15 @@ int main()
             if ((id_h_bit % 4) == 3)
             {
                 hex_value = (int_hex < 10) ? ('0' + int_hex) : ('a' + (int_hex - 10));
-                out[hex_index] = hex_value;
+                result.out[hex_index] = hex_value;
                 hex_index++;
                 int_hex = 0;
             }
         }
-        printf("\n\n");
     }
 
     for (int i = 0; i < 64; i++) // 8 caratteri hex per word
-        printf("%c", out[i]);
-    printf("\n\n");
+        printf("%c", result.out[i]);
+    printf("\n");
     return 0;
 }
-
-// b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9

@@ -13,9 +13,9 @@ uint8_t *padding(uint8_t *bits, int max_length, int amount)
     return bits_pad;
 }
 
-struct Word char_to_bit(const char *string)
+struct Word_sha256 char_to_bit(const char *string)
 {
-    struct Word word;
+    struct Word_sha256 word;
     word.length = strlen(string);
     word.length_bit = strlen(string) * 8;
     // printf("result.length_bit --> %d \n", word.length_bit);
@@ -35,7 +35,7 @@ struct Word char_to_bit(const char *string)
     return word;
 }
 
-void bit_to_hex(struct Word *bits)
+void bit_to_hex(struct Word_sha256 *bits)
 {
     bits->hex_length = bits->length * 2;
 
@@ -63,7 +63,7 @@ void bit_to_hex(struct Word *bits)
     }
 }
 
-void chunks(struct Word *word, int chunk_length)
+void chunks(struct Word_sha256 *word, int chunk_length)
 {
     int amount_chunks = word->length_bit / chunk_length; // calcolo quanti bit è composta la word
     // int true_bit_words = word->length_bit;               // quantità corretta di bit delle parole
@@ -108,30 +108,15 @@ void little_endian(uint8_t *array_bit, int len)
     }
 }
 
-int if_(int i, int y, int z)
-{
-    return (i == 1) ? y : z;
-}
-
-int XOR_(int i, int j)
-{
-    return if_(i, if_(j, 0, 1), j);
-}
-
 uint32_t *XOR_ARRAY(uint32_t i_array[], uint32_t j_array[])
 {
     uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
     for (int id = 0; id < 32; id++)
     {
-        ret[id] = XOR_(i_array[id], j_array[id]);
+        ret[id] = (i_array[id] + j_array[id]) % 2;
     }
 
     return ret;
-}
-
-int XORXOR_(int i, int j, int l)
-{
-    return XOR_(i, XOR_(j, l));
 }
 
 uint32_t *XORXOR_ARRAY(uint32_t i_array[], uint32_t j_array[], uint32_t l_array[], int length)
@@ -139,14 +124,10 @@ uint32_t *XORXOR_ARRAY(uint32_t i_array[], uint32_t j_array[], uint32_t l_array[
     uint32_t *ret = (uint32_t *)calloc(length, sizeof(uint32_t));
     for (int id_array = 0; id_array < length; id_array++)
     {
-        ret[id_array] = XORXOR_(i_array[id_array], j_array[id_array], l_array[id_array]);
+        ret[id_array] = (i_array[id_array] + ((j_array[id_array] + l_array[id_array]) % 2)) % 2;
+        ;
     }
     return ret;
-}
-
-int AND(int i, int j)
-{
-    return if_(i, j, 0);
 }
 
 uint32_t *AND_ARRAY(uint32_t i_array[], uint32_t j_array[])
@@ -154,15 +135,10 @@ uint32_t *AND_ARRAY(uint32_t i_array[], uint32_t j_array[])
     uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
     for (int id = 0; id < 32; id++)
     {
-        ret[id] = AND(i_array[id], j_array[id]);
+        ret[id] = (i_array[id] == 1) ? j_array[id] : 0;
     }
 
     return ret;
-}
-
-int NOT_(int i)
-{
-    return if_(i, 0, 1);
 }
 
 uint32_t *NOT_ARRAY(uint32_t i_array[])
@@ -170,7 +146,7 @@ uint32_t *NOT_ARRAY(uint32_t i_array[])
     uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
     for (int id = 0; id < 32; id++)
     {
-        ret[id] = NOT_(i_array[id]);
+        ret[id] = (i_array[id] == 1) ? 0 : 1;
     }
 
     return ret;
@@ -191,6 +167,13 @@ int maj(int i, int j, int k)
 uint32_t *rotr_arr(uint32_t array[], int index, int length)
 {
 
+    /*
+    metodo per ruotare un array in base a index
+    es.
+    index 3
+    [1,2,3,4,5] --> [4,5,1,2,3]
+    questo avviene rompendo l'array in due parti per poi ricomporlo
+    */
     uint32_t *ret = (uint32_t *)calloc(length, sizeof(uint32_t));
     uint32_t *first_half = (uint32_t *)calloc((length - index), sizeof(uint32_t));
     uint32_t *second_half = (uint32_t *)calloc((index), sizeof(uint32_t));
@@ -198,33 +181,9 @@ uint32_t *rotr_arr(uint32_t array[], int index, int length)
     memcpy(first_half, array, (length - index) * sizeof(uint32_t));
     memcpy(second_half, array + (length - index), index * sizeof(uint32_t));
 
-    /*
-
-    printf("test\n");
-    for (size_t i = 0; i < (length - index); i++)
-    {
-        printf("%u", first_half[i]);
-    }
-
-    printf("\ntest2\n");
-    for (size_t i = 0; i < index; i++)
-    {
-        printf("%u", second_half[i]);
-    }
-    */
-
     memcpy(ret, second_half, index * sizeof(uint32_t));
     memcpy(ret + index, first_half, (length - index) * sizeof(uint32_t));
 
-    /*
-    printf("\ntest 3\n");
-    for (size_t i = 0; i < length; i++)
-    {
-        printf("%u", ret[i]);
-    }
-    printf("\n");
-
-    */
     free(first_half);
     free(second_half);
 
@@ -233,6 +192,12 @@ uint32_t *rotr_arr(uint32_t array[], int index, int length)
 
 uint32_t *shift_arr_right(uint32_t array[], int index)
 {
+    /*
+    metodo che viene usato per shiftare un array a destra in base a index
+    es.
+    index 3
+    [1,2,3,4,5] --> [0,0,0,1,2]
+    */
     uint32_t *ret = (uint32_t *)calloc(32, sizeof(uint32_t) * 32);
     memcpy(ret + index, array, (32 - index) * sizeof(uint32_t));
 

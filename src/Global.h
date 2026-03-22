@@ -10,7 +10,7 @@
 #define LENGTH_MESSAGE 64
 #define LENGTH_WORDS_SHA256 32
 
-struct Word
+struct Word_sha256
 {
     uint8_t *bit; // bit della parola trasformata
     int length_bit;
@@ -24,6 +24,8 @@ struct Word
     int Num_of_chunks;
 
     uint8_t *process_message_bit; // bit processo del messaggio
+
+    uint32_t out[65];
 };
 
 // perchè fatto uint_8 i chunks
