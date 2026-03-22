@@ -19,7 +19,7 @@ struct Word_sha256 char_to_bit(const char *string)
     word.length = strlen(string);
     word.length_bit = strlen(string) * 8;
     // printf("result.length_bit --> %d \n", word.length_bit);
-    word.bit = (uint8_t *)calloc(word.length_bit, sizeof(uint8_t));
+    word.bits = (uint8_t *)calloc(word.length_bit, sizeof(uint8_t));
 
     for (int char_id = 0; char_id < word.length; char_id++)
     {
@@ -27,7 +27,7 @@ struct Word_sha256 char_to_bit(const char *string)
         for (int id_bit = 7; id_bit >= 0; id_bit--)
         {
             size_t index = (char_id * 8) + (7 - id_bit);    // indice
-            word.bit[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
+            word.bits[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
             // printf("%d\n", word.bit[(char_id * 8) + (7 - id_bit)]);
         }
         // printf("\n");
@@ -50,7 +50,7 @@ void bit_to_hex(struct Word_sha256 *bits)
         for (int id_bit = 0; 3 >= id_bit; id_bit++)
         {
             // controllo se il bit è acceso
-            if (bits->bit[bit_id])
+            if (bits->bits[bit_id])
             {
                 // accumulo spostando il bit
                 int_hex |= (1 << id_bit);

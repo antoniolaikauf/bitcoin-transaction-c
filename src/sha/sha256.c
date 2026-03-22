@@ -65,7 +65,7 @@ int main()
     if (result.length_bit < LOW)
     {
         printf("minore di 448\n");
-        bits_padding = padding(result.bit, LOW, result.length_bit);
+        bits_padding = padding(result.bits, LOW, result.length_bit);
         bits_padding[result.length_bit] = 1;
 
         result.process_message_bit = (uint8_t *)calloc(MEDIUM, sizeof(uint8_t));
@@ -76,7 +76,7 @@ int main()
     else if ((LOW <= result.length_bit) && (result.length_bit <= MEDIUM))
     {
         printf("minore di 512\n");
-        bits_padding = padding(result.bit, HIGH, result.length_bit);
+        bits_padding = padding(result.bits, HIGH, result.length_bit);
         bits_padding[result.length_bit] = 1;
 
         result.process_message_bit = (uint8_t *)calloc(HIGH, sizeof(uint8_t));
@@ -91,7 +91,7 @@ int main()
         int length = result.length_bit;
         while ((length + LENGTH_MESSAGE) % MEDIUM != 0)
             length++;
-        bits_padding = padding(result.bit, length, result.length_bit);
+        bits_padding = padding(result.bits, length, result.length_bit);
         bits_padding[result.length_bit] = 1;
 
         result.process_message_bit = (uint8_t *)calloc(LENGTH_MESSAGE + length, sizeof(uint8_t));

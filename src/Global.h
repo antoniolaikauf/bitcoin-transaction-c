@@ -12,7 +12,7 @@
 
 struct Word_sha256
 {
-    uint8_t *bit; // bit della parola trasformata
+    uint8_t *bits; // bit della parola trasformata
     int length_bit;
 
     size_t length; // lunghezza della parola
