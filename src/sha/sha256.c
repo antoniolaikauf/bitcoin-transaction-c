@@ -32,7 +32,7 @@ uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
     return sums;
 }
 
-void sha256(struct Word_sha256 *result)
+void sha256(struct sha256 *result)
 {
     char_to_bit(result);
     bit_to_hex(result);
@@ -200,7 +200,7 @@ void sha256(struct Word_sha256 *result)
 // test
 int main()
 {
-    struct Word_sha256 result;
+    struct sha256 result;
     result.sha_base = (Sha *)calloc(1, sizeof(Sha));
     result.sha_base->input_word = "hello world";
 

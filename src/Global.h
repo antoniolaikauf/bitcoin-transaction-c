@@ -28,10 +28,14 @@ typedef struct
     uint8_t *process_message_bit; // bit processo del messaggio
 } Sha;
 
-struct Word_sha256
+struct sha256
 {
     Sha *sha_base;
     uint32_t digest[65]; // output
 };
 
-// perchè fatto uint_8 i chunks
+struct sha512
+{
+    Sha *sha_base;
+    uint64_t digest[80];
+};

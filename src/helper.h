@@ -13,7 +13,7 @@ uint8_t *padding(uint8_t *bits, int max_length, int amount)
     return bits_pad;
 }
 
-void char_to_bit(struct Word_sha256 *input)
+void char_to_bit(struct sha256 *input)
 {
     input->sha_base->length = strlen(input->sha_base->input_word);
     input->sha_base->length_bit = strlen(input->sha_base->input_word) * 8;
@@ -33,7 +33,7 @@ void char_to_bit(struct Word_sha256 *input)
     }
 }
 
-void bit_to_hex(struct Word_sha256 *bits)
+void bit_to_hex(struct sha256 *bits)
 {
     bits->sha_base->hex_length = bits->sha_base->length * 2;
 
@@ -61,7 +61,7 @@ void bit_to_hex(struct Word_sha256 *bits)
     }
 }
 
-void chunks(struct Word_sha256 *word, int chunk_length)
+void chunks(struct sha256 *word, int chunk_length)
 {
     int amount_chunks = word->sha_base->length_bit / chunk_length; // calcolo quanti bit è composta la word
     // int true_bit_words = word->length_bit;               // quantità corretta di bit delle parole
