@@ -10,8 +10,10 @@
 #define LENGTH_MESSAGE 64
 #define LENGTH_WORDS_SHA256 32
 
-struct Word_sha256
+typedef struct
 {
+    const char *input_word; // input
+
     uint8_t *bits; // bit della parola trasformata
     int length_bit;
 
@@ -24,10 +26,12 @@ struct Word_sha256
     int Num_of_chunks;
 
     uint8_t *process_message_bit; // bit processo del messaggio
+} Sha;
 
-    uint32_t out[65];
-
-    const char *input_word; // input
+struct Word_sha256
+{
+    Sha *sha_base;
+    uint32_t digest[65]; // output
 };
 
 // perchè fatto uint_8 i chunks

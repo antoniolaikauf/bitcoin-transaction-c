@@ -34,25 +34,20 @@ uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 
 void sha256(struct Word_sha256 *result)
 {
-
-    // struct Word_sha256 result = char_to_bit(test);
     char_to_bit(result);
     bit_to_hex(result);
-
     // lunghezza in bit
     uint8_t message_len_bit[LENGTH_MESSAGE];
     for (int id_bit = 0; id_bit < LENGTH_MESSAGE; id_bit++)
     {
         unsigned long long val = ((unsigned long long)1) << id_bit;
-        message_len_bit[id_bit] = (unsigned long long)result->length_bit & val ? 1 : 0;
+        message_len_bit[id_bit] = (unsigned long long)result->sha_base->length_bit & val ? 1 : 0;
         // printf("message_len_bit[id_bit] --> %d\n", message_len_bit[id_bit]);
     }
 
     little_endian(message_len_bit, 64);
     // add at the end a 1 bit
     /*
-
-    b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
         1 si aggiungono tot bot 0 in base a quanto sono lunghi i bit della parola che si
         sta processando
         2 si aggiunge 1 nella posizione di result.length_bit
@@ -62,41 +57,41 @@ void sha256(struct Word_sha256 *result)
     */
 
     uint8_t *bits_padding;
-    if (result->length_bit < LOW)
+    if (result->sha_base->length_bit < LOW)
     {
         printf("minore di 448\n");
-        bits_padding = padding(result->bits, LOW, result->length_bit);
-        bits_padding[result->length_bit] = 1;
+        bits_padding = padding(result->sha_base->bits, LOW, result->sha_base->length_bit);
+        bits_padding[result->sha_base->length_bit] = 1;
 
-        result->process_message_bit = (uint8_t *)calloc(MEDIUM, sizeof(uint8_t));
-        memcpy(result->process_message_bit, bits_padding, LOW);
-        memcpy(result->process_message_bit + LOW, message_len_bit, LENGTH_MESSAGE);
+        result->sha_base->process_message_bit = (uint8_t *)calloc(MEDIUM, sizeof(uint8_t));
+        memcpy(result->sha_base->process_message_bit, bits_padding, LOW);
+        memcpy(result->sha_base->process_message_bit + LOW, message_len_bit, LENGTH_MESSAGE);
         chunks(result, MEDIUM);
     }
-    else if ((LOW <= result->length_bit) && (result->length_bit <= MEDIUM))
+    else if ((LOW <= result->sha_base->length_bit) && (result->sha_base->length_bit <= MEDIUM))
     {
         printf("minore di 512\n");
-        bits_padding = padding(result->bits, HIGH, result->length_bit);
-        bits_padding[result->length_bit] = 1;
+        bits_padding = padding(result->sha_base->bits, HIGH, result->sha_base->length_bit);
+        bits_padding[result->sha_base->length_bit] = 1;
 
-        result->process_message_bit = (uint8_t *)calloc(HIGH, sizeof(uint8_t));
-        memcpy(result->process_message_bit, bits_padding, (HIGH - LENGTH_MESSAGE));
-        memcpy(result->process_message_bit + (HIGH - LENGTH_MESSAGE), message_len_bit, LENGTH_MESSAGE);
+        result->sha_base->process_message_bit = (uint8_t *)calloc(HIGH, sizeof(uint8_t));
+        memcpy(result->sha_base->process_message_bit, bits_padding, (HIGH - LENGTH_MESSAGE));
+        memcpy(result->sha_base->process_message_bit + (HIGH - LENGTH_MESSAGE), message_len_bit, LENGTH_MESSAGE);
 
         chunks(result, MEDIUM);
     }
     else
     {
         printf("maggiore di 512\n");
-        int length = result->length_bit;
+        int length = result->sha_base->length_bit;
         while ((length + LENGTH_MESSAGE) % MEDIUM != 0)
             length++;
-        bits_padding = padding(result->bits, length, result->length_bit);
-        bits_padding[result->length_bit] = 1;
+        bits_padding = padding(result->sha_base->bits, length, result->sha_base->length_bit);
+        bits_padding[result->sha_base->length_bit] = 1;
 
-        result->process_message_bit = (uint8_t *)calloc(LENGTH_MESSAGE + length, sizeof(uint8_t));
-        memcpy(result->process_message_bit, bits_padding, length);
-        memcpy(result->process_message_bit + length, message_len_bit, LENGTH_MESSAGE);
+        result->sha_base->process_message_bit = (uint8_t *)calloc(LENGTH_MESSAGE + length, sizeof(uint8_t));
+        memcpy(result->sha_base->process_message_bit, bits_padding, length);
+        memcpy(result->sha_base->process_message_bit + length, message_len_bit, LENGTH_MESSAGE);
 
         chunks(result, MEDIUM);
     }
@@ -111,7 +106,7 @@ void sha256(struct Word_sha256 *result)
         hex_to_bit(Hash[id_h], Hash_bit[id_h]);
     }
 
-    for (int id_chunk = 0; id_chunk < result->Num_of_chunks; id_chunk++)
+    for (int id_chunk = 0; id_chunk < result->sha_base->Num_of_chunks; id_chunk++)
     {
         uint32_t Words[64][LENGTH_WORDS_SHA256];
         memset(Words, 0, sizeof(Words));
@@ -122,7 +117,7 @@ void sha256(struct Word_sha256 *result)
         {
             for (int id_words_bit = 0; id_words_bit < LENGTH_WORDS_SHA256; id_words_bit++)
             {
-                Words[id_words][id_words_bit] = result->chunks_bits[id_chunk][(id_words * LENGTH_WORDS_SHA256) + id_words_bit];
+                Words[id_words][id_words_bit] = result->sha_base->chunks_bits[id_chunk][(id_words * LENGTH_WORDS_SHA256) + id_words_bit];
                 // printf("%d", Words[id_words][id_words_bit]);
             }
             // printf(" words --> %d\n", id_words);
@@ -194,7 +189,7 @@ void sha256(struct Word_sha256 *result)
             if ((id_h_bit % 4) == 3)
             {
                 hex_value = (int_hex < 10) ? ('0' + int_hex) : ('a' + (int_hex - 10));
-                result->out[hex_index] = hex_value;
+                result->digest[hex_index] = hex_value;
                 hex_index++;
                 int_hex = 0;
             }
@@ -202,14 +197,16 @@ void sha256(struct Word_sha256 *result)
     }
 }
 
+// test
 int main()
 {
-
     struct Word_sha256 result;
-    result.input_word = "hello world";
+    result.sha_base = (Sha *)calloc(1, sizeof(Sha));
+    result.sha_base->input_word = "hello world";
+
     sha256(&result);
     for (int i = 0; i < 64; i++) // 8 caratteri hex per word
-        printf("%c", result.out[i]);
+        printf("%c", result.digest[i]);
     printf("\n");
     return 0;
 }
