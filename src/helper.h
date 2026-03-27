@@ -13,26 +13,24 @@ uint8_t *padding(uint8_t *bits, int max_length, int amount)
     return bits_pad;
 }
 
-struct Word_sha256 char_to_bit(const char *string)
+void char_to_bit(struct Word_sha256 *input)
 {
-    struct Word_sha256 word;
-    word.length = strlen(string);
-    word.length_bit = strlen(string) * 8;
-    // printf("result.length_bit --> %d \n", word.length_bit);
-    word.bits = (uint8_t *)calloc(word.length_bit, sizeof(uint8_t));
+    input->length = strlen(input->input_word);
+    input->length_bit = strlen(input->input_word) * 8;
+    // printf("result.length_bit --> %d \n", input.length_bit);
+    input->bits = (uint8_t *)calloc(input->length_bit, sizeof(uint8_t));
 
-    for (int char_id = 0; char_id < word.length; char_id++)
+    for (int char_id = 0; char_id < input->length; char_id++)
     {
-        char ch = string[char_id];
+        char ch = input->input_word[char_id];
         for (int id_bit = 7; id_bit >= 0; id_bit--)
         {
-            size_t index = (char_id * 8) + (7 - id_bit);    // indice
-            word.bits[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
-            // printf("%d\n", word.bit[(char_id * 8) + (7 - id_bit)]);
+            size_t index = (char_id * 8) + (7 - id_bit);       // indice
+            input->bits[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
+            // printf("%d\n", input.bit[(char_id * 8) + (7 - id_bit)]);
         }
         // printf("\n");
     }
-    return word;
 }
 
 void bit_to_hex(struct Word_sha256 *bits)

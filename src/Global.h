@@ -26,6 +26,8 @@ struct Word_sha256
     uint8_t *process_message_bit; // bit processo del messaggio
 
     uint32_t out[65];
+
+    const char *input_word; // input
 };
 
 // perchè fatto uint_8 i chunks
