@@ -37,11 +37,11 @@ typedef struct
 struct sha256
 {
     Sha *sha_base;
-    uint32_t digest[65]; // output
+    char digest[65]; // output
 };
 
 struct sha512
 {
     Sha *sha_base;
-    uint64_t digest[128]; // output
+    char digest[129]; // output
 };

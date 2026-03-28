@@ -56,7 +56,7 @@ void sha256(struct sha256 *result)
     }
 
     little_endian(message_len_bit, 64);
-    // add at the end a 1 bit
+    //  add at the end a 1 bit
     /*
         1 si aggiungono tot bot 0 in base a quanto sono lunghi i bit della parola che si
         sta processando
@@ -128,9 +128,9 @@ void sha256(struct sha256 *result)
             for (int id_words_bit = 0; id_words_bit < LENGTH_WORDS_SHA256; id_words_bit++)
             {
                 Words[id_words][id_words_bit] = result->sha_base->chunks_bits[id_chunk][(id_words * LENGTH_WORDS_SHA256) + id_words_bit];
-                // printf("%d", Words[id_words][id_words_bit]);
+                printf("%d", Words[id_words][id_words_bit]);
             }
-            // printf(" words --> %d\n", id_words);
+            printf(" words --> %d\n", id_words);
         }
 
         for (int id = 16; id < 64; id++)
@@ -139,6 +139,10 @@ void sha256(struct sha256 *result)
             uint32_t *s1 = XORXOR_ARRAY_uint32_t(rotr_arr_uint32_t(Words[id - 2], 17, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(Words[id - 2], 19, LENGTH_WORDS_SHA256), shift_arr_right_uint32_t(Words[id - 2], 10, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
             uint32_t *W = adder(adder(adder(Words[id - 16], s0, LENGTH_WORDS_SHA256), Words[id - 7], LENGTH_WORDS_SHA256), s1, LENGTH_WORDS_SHA256);
             memcpy(Words[id], W, sizeof(uint32_t) * LENGTH_WORDS_SHA256);
+
+            free(s0);
+            free(s1);
+            free(W);
         }
 
         uint32_t a[32], b[32], c[32], d[32], e[32], f[32], g[32], h[32];
@@ -172,6 +176,13 @@ void sha256(struct sha256 *result)
             memcpy(b, a, sizeof(uint32_t) * 32);
 
             memcpy(a, adder(temp1, temp2, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);
+
+            free(S1);
+            free(ch);
+            free(S0);
+            free(m);
+            free(temp2);
+            free(temp1);
         }
 
         memcpy(Hash_bit[0], adder(Hash_bit[0], a, LENGTH_WORDS_SHA256), sizeof(uint32_t) * 32);

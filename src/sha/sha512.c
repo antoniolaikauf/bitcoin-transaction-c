@@ -113,7 +113,7 @@ void sha512(struct sha512 *input)
         chunks(input->sha_base, MEDIUM_SHA512);
     }
 
-    for (int id_K = 0; id_K < 64; id_K++)
+    for (int id_K = 0; id_K < 80; id_K++)
     {
         hex_to_bit_64(Key[id_K], Key_bit[id_K]);
     }
@@ -145,46 +145,58 @@ void sha512(struct sha512 *input)
             uint64_t *s1 = XORXOR_ARRAY_uint64_t(rotr_arr_uint64_t(Words[id_words - 2], 19, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(Words[id_words - 2], 61, LENGTH_WORDS_SHA512), shift_arr_right_uint64_t(Words[id_words - 2], 6, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
             uint64_t *W = adder(adder(adder(Words[id_words - 16], s0, LENGTH_WORDS_SHA512), Words[id_words - 7], LENGTH_WORDS_SHA512), s1, LENGTH_WORDS_SHA512);
             memcpy(Words[id_words], W, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+
+            free(s0);
+            free(s1);
+            free(W);
         }
 
-        uint64_t a[32], b[32], c[32], d[32], e[32], f[32], g[32], h[32];
+        uint64_t a[LENGTH_WORDS_SHA512], b[LENGTH_WORDS_SHA512], c[LENGTH_WORDS_SHA512], d[LENGTH_WORDS_SHA512], e[LENGTH_WORDS_SHA512], f[LENGTH_WORDS_SHA512], g[LENGTH_WORDS_SHA512], h[LENGTH_WORDS_SHA512];
 
-        memcpy(a, Hash_bit[0], sizeof(uint64_t) * 32);
-        memcpy(b, Hash_bit[1], sizeof(uint64_t) * 32);
-        memcpy(c, Hash_bit[2], sizeof(uint64_t) * 32);
-        memcpy(d, Hash_bit[3], sizeof(uint64_t) * 32);
-        memcpy(e, Hash_bit[4], sizeof(uint64_t) * 32);
-        memcpy(f, Hash_bit[5], sizeof(uint64_t) * 32);
-        memcpy(g, Hash_bit[6], sizeof(uint64_t) * 32);
-        memcpy(h, Hash_bit[7], sizeof(uint64_t) * 32);
+        memcpy(a, Hash_bit[0], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(b, Hash_bit[1], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(c, Hash_bit[2], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(d, Hash_bit[3], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(e, Hash_bit[4], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(f, Hash_bit[5], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(g, Hash_bit[6], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(h, Hash_bit[7], sizeof(uint64_t) * LENGTH_WORDS_SHA512);
 
         for (size_t j = 0; j < 80; j++)
         {
+
             uint64_t *S1 = XORXOR_ARRAY_uint64_t(rotr_arr_uint64_t(e, 14, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(e, 18, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(e, 41, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
-            uint64_t *ch = XOR_ARRAY_uint64_t(AND_ARRAY_uint64_t(e, f, LENGTH_WORDS_SHA512), AND_ARRAY_uint64_t(e, g, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
+            uint64_t *ch = XOR_ARRAY_uint64_t(AND_ARRAY_uint64_t(e, f, LENGTH_WORDS_SHA512), AND_ARRAY_uint64_t(NOT_ARRAY_uint64_t(e, LENGTH_WORDS_SHA512), g, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
             uint64_t *temp1 = adder(adder(adder(adder(h, S1, LENGTH_WORDS_SHA512), ch, LENGTH_WORDS_SHA512), Key_bit[j], LENGTH_WORDS_SHA512), Words[j], LENGTH_WORDS_SHA512);
-            uint64_t *S0 = XORXOR_ARRAY_uint64_t(rotr_arr_uint64_t(e, 28, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(e, 34, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(e, 39, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
+            uint64_t *S0 = XORXOR_ARRAY_uint64_t(rotr_arr_uint64_t(a, 28, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(a, 34, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(a, 39, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
             uint64_t *m = XORXOR_ARRAY_uint64_t(AND_ARRAY_uint64_t(a, b, LENGTH_WORDS_SHA512), AND_ARRAY_uint64_t(a, c, LENGTH_WORDS_SHA512), AND_ARRAY_uint64_t(b, c, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
             uint64_t *temp2 = adder(S0, m, LENGTH_WORDS_SHA512);
 
-            memcpy(h, g, sizeof(uint64_t) * 64);
-            memcpy(g, f, sizeof(uint64_t) * 64);
-            memcpy(f, e, sizeof(uint64_t) * 64);
-            memcpy(e, adder(d, temp1, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-            memcpy(d, c, sizeof(uint64_t) * 64);
-            memcpy(c, b, sizeof(uint64_t) * 64);
-            memcpy(b, a, sizeof(uint64_t) * 64);
-            memcpy(a, adder(temp1, temp2, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
+            memcpy(h, g, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            memcpy(g, f, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            memcpy(f, e, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            memcpy(e, adder(d, temp1, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            memcpy(d, c, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            memcpy(c, b, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            memcpy(b, a, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            memcpy(a, adder(temp1, temp2, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+
+            free(S1);
+            free(ch);
+            free(S0);
+            free(m);
+            free(temp2);
+            free(temp1);
         }
 
-        memcpy(Hash_bit[0], adder(Hash_bit[0], a, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-        memcpy(Hash_bit[1], adder(Hash_bit[1], b, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-        memcpy(Hash_bit[2], adder(Hash_bit[2], c, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-        memcpy(Hash_bit[3], adder(Hash_bit[3], d, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-        memcpy(Hash_bit[4], adder(Hash_bit[4], e, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-        memcpy(Hash_bit[5], adder(Hash_bit[5], f, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-        memcpy(Hash_bit[6], adder(Hash_bit[6], g, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
-        memcpy(Hash_bit[7], adder(Hash_bit[7], h, LENGTH_WORDS_SHA512), sizeof(uint64_t) * 64);
+        memcpy(Hash_bit[0], adder(Hash_bit[0], a, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(Hash_bit[1], adder(Hash_bit[1], b, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(Hash_bit[2], adder(Hash_bit[2], c, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(Hash_bit[3], adder(Hash_bit[3], d, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(Hash_bit[4], adder(Hash_bit[4], e, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(Hash_bit[5], adder(Hash_bit[5], f, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(Hash_bit[6], adder(Hash_bit[6], g, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+        memcpy(Hash_bit[7], adder(Hash_bit[7], h, LENGTH_WORDS_SHA512), sizeof(uint64_t) * LENGTH_WORDS_SHA512);
     }
 
     int hex_int = 0;
@@ -216,8 +228,6 @@ int main()
     result.sha_base = (Sha *)calloc(1, sizeof(Sha));
     result.sha_base->input_word = "hello world";
 
-    // 309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f989dd35bc5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f
-    // 7fb0ab95707ec6603829abde750fdec42cb42afcee2d746794e871765f25330951164e98533a974540597d00f13895f5e57e03825636af6cb6d5bf1acacd2f9d
     sha512(&result);
 
     for (size_t i = 0; i < 128; i++)
