@@ -95,6 +95,14 @@ void hex_to_bit(uint32_t Hex, uint32_t Memory[])
     }
 }
 
+void hex_to_bit_64(uint64_t Hex, uint64_t Memory[])
+{
+    for (int id_hex = 0; id_hex < LENGTH_WORDS_SHA512; id_hex++)
+    {
+        Memory[id_hex] = ((Hex >> (63 - id_hex)) & 1);
+    }
+}
+
 // swap importanza di bit in little endian quindi il bit meno significativo si trova a destra
 void little_endian(uint8_t *array_bit, int len)
 {
@@ -106,49 +114,48 @@ void little_endian(uint8_t *array_bit, int len)
     }
 }
 
-uint32_t *XOR_ARRAY(uint32_t i_array[], uint32_t j_array[])
-{
-    uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
-    for (int id = 0; id < 32; id++)
-    {
-        ret[id] = (i_array[id] + j_array[id]) % 2;
+#define DEFINE_XOR_ARRAY(type)                                                 \
+    type *XOR_ARRAY_##type(type i_array[], type j_array[], int length_wpord)   \
+    {                                                                          \
+        type *ret = (type *)calloc(length_wpord, length_wpord * sizeof(type)); \
+        for (int id = 0; id < length_wpord; id++)                              \
+        {                                                                      \
+            ret[id] = (i_array[id] + j_array[id]) % 2;                         \
+        }                                                                      \
+        return ret;                                                            \
+    }
+#define DEFINE_XORXOR_ARRAY(type)                                                                    \
+    type *XORXOR_ARRAY_##type(type i_array[], type j_array[], type l_array[], int length)            \
+    {                                                                                                \
+        type *ret = (type *)calloc(length, sizeof(type));                                            \
+        for (int id_array = 0; id_array < length; id_array++)                                        \
+        {                                                                                            \
+            ret[id_array] = (i_array[id_array] + ((j_array[id_array] + l_array[id_array]) % 2)) % 2; \
+        }                                                                                            \
+        return ret;                                                                                  \
     }
 
-    return ret;
-}
-
-uint32_t *XORXOR_ARRAY(uint32_t i_array[], uint32_t j_array[], uint32_t l_array[], int length)
-{
-    uint32_t *ret = (uint32_t *)calloc(length, sizeof(uint32_t));
-    for (int id_array = 0; id_array < length; id_array++)
-    {
-        ret[id_array] = (i_array[id_array] + ((j_array[id_array] + l_array[id_array]) % 2)) % 2;
-        ;
-    }
-    return ret;
-}
-
-uint32_t *AND_ARRAY(uint32_t i_array[], uint32_t j_array[])
-{
-    uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
-    for (int id = 0; id < 32; id++)
-    {
-        ret[id] = (i_array[id] == 1) ? j_array[id] : 0;
+#define DEFINE_AND_ARRAY(type)                                               \
+    type *AND_ARRAY_##type(type i_array[], type j_array[], int length_word)  \
+    {                                                                        \
+        type *ret = (type *)calloc(length_word, length_word * sizeof(type)); \
+        for (int id = 0; id < length_word; id++)                             \
+        {                                                                    \
+            ret[id] = (i_array[id] == 1) ? j_array[id] : 0;                  \
+        }                                                                    \
+        return ret;                                                          \
     }
 
-    return ret;
-}
-
-uint32_t *NOT_ARRAY(uint32_t i_array[])
-{
-    uint32_t *ret = (uint32_t *)calloc(32, 32 * sizeof(uint32_t));
-    for (int id = 0; id < 32; id++)
-    {
-        ret[id] = (i_array[id] == 1) ? 0 : 1;
+#define DEFINE_NOT_ARRAY(type)                                               \
+    type *NOT_ARRAY_##type(type i_array[], int length_word)                  \
+    {                                                                        \
+        type *ret = (type *)calloc(length_word, length_word * sizeof(type)); \
+        for (int id = 0; id < length_word; id++)                             \
+        {                                                                    \
+            ret[id] = (i_array[id] == 1) ? 0 : 1;                            \
+        }                                                                    \
+        return ret;                                                          \
     }
-
-    return ret;
-}
 
 int maj(int i, int j, int k)
 {
@@ -162,42 +169,56 @@ int maj(int i, int j, int k)
     return ((i == k) && (i != j)) ? i : j;
 }
 
-uint32_t *rotr_arr(uint32_t array[], int index, int length)
-{
+/*
+metodo per ruotare un array in base a index
+es.
+index 3
+[1,2,3,4,5] --> [4,5,1,2,3]
+questo avviene rompendo l'array in due parti per poi ricomporlo
+*/
 
-    /*
-    metodo per ruotare un array in base a index
-    es.
-    index 3
-    [1,2,3,4,5] --> [4,5,1,2,3]
-    questo avviene rompendo l'array in due parti per poi ricomporlo
-    */
-    uint32_t *ret = (uint32_t *)calloc(length, sizeof(uint32_t));
-    uint32_t *first_half = (uint32_t *)calloc((length - index), sizeof(uint32_t));
-    uint32_t *second_half = (uint32_t *)calloc((index), sizeof(uint32_t));
+#define DEFINE_ROTR(type)                                               \
+    type *rotr_arr_##type(type array[], int index, int length)          \
+    {                                                                   \
+        if (length <= 0)                                                \
+            return NULL;                                                \
+        index = index % length;                                         \
+        if (index < 0)                                                  \
+            index += length;                                            \
+                                                                        \
+        type *ret = (type *)calloc(length, sizeof(type));               \
+        type *first = (type *)calloc(length - index, sizeof(type));     \
+        type *second = (type *)calloc(index, sizeof(type));             \
+                                                                        \
+        if (!ret || !first || !second)                                  \
+        {                                                               \
+            free(ret);                                                  \
+            free(first);                                                \
+            free(second);                                               \
+            return NULL;                                                \
+        }                                                               \
+                                                                        \
+        memcpy(first, array, (length - index) * sizeof(type));          \
+        memcpy(second, array + (length - index), index * sizeof(type)); \
+                                                                        \
+        memcpy(ret, second, index * sizeof(type));                      \
+        memcpy(ret + index, first, (length - index) * sizeof(type));    \
+                                                                        \
+        free(first);                                                    \
+        free(second);                                                   \
+        return ret;                                                     \
+    }
 
-    memcpy(first_half, array, (length - index) * sizeof(uint32_t));
-    memcpy(second_half, array + (length - index), index * sizeof(uint32_t));
-
-    memcpy(ret, second_half, index * sizeof(uint32_t));
-    memcpy(ret + index, first_half, (length - index) * sizeof(uint32_t));
-
-    free(first_half);
-    free(second_half);
-
-    return ret;
-}
-
-uint32_t *shift_arr_right(uint32_t array[], int index)
-{
-    /*
-    metodo che viene usato per shiftare un array a destra in base a index
-    es.
-    index 3
-    [1,2,3,4,5] --> [0,0,0,1,2]
-    */
-    uint32_t *ret = (uint32_t *)calloc(32, sizeof(uint32_t) * 32);
-    memcpy(ret + index, array, (32 - index) * sizeof(uint32_t));
-
-    return ret;
-}
+/*
+metodo che viene usato per shiftare un array a destra in base a index
+es.
+index 3
+[1,2,3,4,5] --> [0,0,0,1,2]
+*/
+#define DEFINE_SHIFT(type)                                                   \
+    type *shift_arr_right_##type(type array[], int index, int lenght_word)   \
+    {                                                                        \
+        type *ret = (type *)calloc(lenght_word, sizeof(type) * lenght_word); \
+        memcpy(ret + index, array, (lenght_word - index) * sizeof(type));    \
+        return ret;                                                          \
+    }

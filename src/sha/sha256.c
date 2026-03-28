@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <limits.h>
 
+DEFINE_ROTR(uint32_t);
+DEFINE_SHIFT(uint32_t);
+DEFINE_XOR_ARRAY(uint32_t);
+DEFINE_XORXOR_ARRAY(uint32_t);
+DEFINE_AND_ARRAY(uint32_t);
+DEFINE_NOT_ARRAY(uint32_t);
 /* The values are the first 32 bits of the fractional parts of the square roots of the first 8 primes.
  es. sqrt(2) --> si prende la parte frazionaria (i numeri dopo la virgola) --> la si moltiplica per 2**32 --> trasformazione in esadecimale
 */
@@ -128,8 +134,8 @@ void sha256(struct sha256 *result)
 
         for (int id = 16; id < 64; id++)
         {
-            uint32_t *s0 = XORXOR_ARRAY(rotr_arr(Words[id - 15], 7, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 15], 18, LENGTH_WORDS_SHA256), shift_arr_right(Words[id - 15], 3), LENGTH_WORDS_SHA256);
-            uint32_t *s1 = XORXOR_ARRAY(rotr_arr(Words[id - 2], 17, LENGTH_WORDS_SHA256), rotr_arr(Words[id - 2], 19, LENGTH_WORDS_SHA256), shift_arr_right(Words[id - 2], 10), LENGTH_WORDS_SHA256);
+            uint32_t *s0 = XORXOR_ARRAY_uint32_t(rotr_arr_uint32_t(Words[id - 15], 7, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(Words[id - 15], 18, LENGTH_WORDS_SHA256), shift_arr_right_uint32_t(Words[id - 15], 3, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *s1 = XORXOR_ARRAY_uint32_t(rotr_arr_uint32_t(Words[id - 2], 17, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(Words[id - 2], 19, LENGTH_WORDS_SHA256), shift_arr_right_uint32_t(Words[id - 2], 10, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
             uint32_t *W = adder(adder(adder(Words[id - 16], s0, LENGTH_WORDS_SHA256), Words[id - 7], LENGTH_WORDS_SHA256), s1, LENGTH_WORDS_SHA256);
             memcpy(Words[id], W, sizeof(uint32_t) * LENGTH_WORDS_SHA256);
         }
@@ -147,11 +153,11 @@ void sha256(struct sha256 *result)
 
         for (int j = 0; j < 64; j++)
         {
-            uint32_t *S1 = XORXOR_ARRAY(rotr_arr(e, 6, LENGTH_WORDS_SHA256), rotr_arr(e, 11, LENGTH_WORDS_SHA256), rotr_arr(e, 25, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
-            uint32_t *ch = XOR_ARRAY(AND_ARRAY(e, f), AND_ARRAY(NOT_ARRAY(e), g));
+            uint32_t *S1 = XORXOR_ARRAY_uint32_t(rotr_arr_uint32_t(e, 6, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(e, 11, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(e, 25, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *ch = XOR_ARRAY_uint32_t(AND_ARRAY_uint32_t(e, f, LENGTH_WORDS_SHA256), AND_ARRAY_uint32_t(NOT_ARRAY_uint32_t(e, LENGTH_WORDS_SHA256), g, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
             uint32_t *temp1 = adder(adder(adder(adder(h, S1, LENGTH_WORDS_SHA256), ch, LENGTH_WORDS_SHA256), Key_bit[j], LENGTH_WORDS_SHA256), Words[j], LENGTH_WORDS_SHA256);
-            uint32_t *S0 = XORXOR_ARRAY(rotr_arr(a, 2, LENGTH_WORDS_SHA256), rotr_arr(a, 13, LENGTH_WORDS_SHA256), rotr_arr(a, 22, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
-            uint32_t *m = XORXOR_ARRAY(AND_ARRAY(a, b), AND_ARRAY(a, c), AND_ARRAY(b, c), LENGTH_WORDS_SHA256);
+            uint32_t *S0 = XORXOR_ARRAY_uint32_t(rotr_arr_uint32_t(a, 2, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(a, 13, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(a, 22, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
+            uint32_t *m = XORXOR_ARRAY_uint32_t(AND_ARRAY_uint32_t(a, b, LENGTH_WORDS_SHA256), AND_ARRAY_uint32_t(a, c, LENGTH_WORDS_SHA256), AND_ARRAY_uint32_t(b, c, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
             uint32_t *temp2 = adder(S0, m, LENGTH_WORDS_SHA256);
 
             memcpy(h, g, sizeof(uint32_t) * 32);
