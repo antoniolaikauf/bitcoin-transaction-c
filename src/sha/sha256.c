@@ -9,6 +9,7 @@ DEFINE_XOR_ARRAY(uint32_t);
 DEFINE_XORXOR_ARRAY(uint32_t);
 DEFINE_AND_ARRAY(uint32_t);
 DEFINE_NOT_ARRAY(uint32_t);
+
 /* The values are the first 32 bits of the fractional parts of the square roots of the first 8 primes.
  es. sqrt(2) --> si prende la parte frazionaria (i numeri dopo la virgola) --> la si moltiplica per 2**32 --> trasformazione in esadecimale
 */

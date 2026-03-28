@@ -43,5 +43,5 @@ struct sha256
 struct sha512
 {
     Sha *sha_base;
-    uint64_t digest[80];
+    uint64_t digest[128]; // output
 };

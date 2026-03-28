@@ -115,10 +115,10 @@ void little_endian(uint8_t *array_bit, int len)
 }
 
 #define DEFINE_XOR_ARRAY(type)                                                 \
-    type *XOR_ARRAY_##type(type i_array[], type j_array[], int length_wpord)   \
+    type *XOR_ARRAY_##type(type i_array[], type j_array[], int length_wword)   \
     {                                                                          \
-        type *ret = (type *)calloc(length_wpord, length_wpord * sizeof(type)); \
-        for (int id = 0; id < length_wpord; id++)                              \
+        type *ret = (type *)calloc(length_wword, length_wword * sizeof(type)); \
+        for (int id = 0; id < length_wword; id++)                              \
         {                                                                      \
             ret[id] = (i_array[id] + j_array[id]) % 2;                         \
         }                                                                      \
