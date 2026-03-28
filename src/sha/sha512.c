@@ -48,11 +48,51 @@ void sha512(struct sha512 *input)
     }
 
     little_endian(message_len_bit, LENGTH_MESSAGE_SHA512);
+
+    uint8_t *padding_message;
+
+    if (input->sha_base->length_bit < LOW_SHA512)
+    {
+        printf("minore di 896\n");
+        padding_message = padding(input->sha_base->bits, LOW_SHA512, input->sha_base->length_bit);
+        padding_message[input->sha_base->length_bit] = 1;
+
+        input->sha_base->process_message_bit = (uint8_t *)calloc(MEDIUM_SHA512, sizeof(uint8_t));
+        memcpy(input->sha_base->process_message_bit, padding_message, LOW_SHA512);
+        memcpy(input->sha_base->process_message_bit + LOW_SHA512, message_len_bit, LENGTH_MESSAGE_SHA512);
+        chunks(input->sha_base, MEDIUM_SHA512);
+    }
+    else if ((LOW_SHA512 <= input->sha_base->length_bit) && (input->sha_base->length_bit <= MEDIUM_SHA512))
+    {
+        printf("minore di 1024\n");
+        padding_message = padding(input->sha_base->bits, HIGH_sha512, input->sha_base->length_bit);
+        padding_message[input->sha_base->length_bit] = 1;
+
+        input->sha_base->process_message_bit = (uint8_t *)calloc(HIGH_sha512, sizeof(uint8_t));
+        memcpy(input->sha_base->process_message_bit, padding_message, (HIGH_sha512 - LENGTH_MESSAGE_SHA512));
+        memcpy(input->sha_base->process_message_bit + (HIGH_sha512 - LENGTH_MESSAGE_SHA512), message_len_bit, LENGTH_MESSAGE_SHA512);
+
+        chunks(input->sha_base, MEDIUM_SHA512);
+    }
+    else
+    {
+        printf("maggiore di 1024\n");
+        int length = input->sha_base->length_bit;
+        while ((length + LENGTH_MESSAGE_SHA512) % MEDIUM_SHA512 != 0)
+            length++;
+        padding_message = padding(input->sha_base->bits, length, input->sha_base->length_bit);
+        padding_message[input->sha_base->length_bit] = 1;
+
+        input->sha_base->process_message_bit = (uint8_t *)calloc(LENGTH_MESSAGE_SHA512 + length, sizeof(uint8_t));
+        memcpy(input->sha_base->process_message_bit, padding_message, length);
+        memcpy(input->sha_base->process_message_bit + length, message_len_bit, LENGTH_MESSAGE_SHA512);
+
+        chunks(input->sha_base, MEDIUM_SHA512);
+    }
 }
 
 int main()
 {
-
     struct sha512 result;
 
     result.sha_base = (Sha *)calloc(1, sizeof(Sha));
