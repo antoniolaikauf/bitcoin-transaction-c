@@ -34,15 +34,18 @@ uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 
 void sha256(struct sha256 *result)
 {
-    char_to_bit(result);
-    bit_to_hex(result);
-    // lunghezza in bit
-    uint8_t message_len_bit[LENGTH_MESSAGE];
-    for (int id_bit = 0; id_bit < LENGTH_MESSAGE; id_bit++)
+    char_to_bit(result->sha_base);
+    bit_to_hex(result->sha_base);
+    // lunghezza in bit composta da 64 bit
+    uint8_t message_len_bit[LENGTH_MESSAGE] = {0};
+    int val = 0;
+    unsigned long long mask = 0;
+    while (result->sha_base->length_bit > mask)
     {
-        unsigned long long val = ((unsigned long long)1) << id_bit;
-        message_len_bit[id_bit] = (unsigned long long)result->sha_base->length_bit & val ? 1 : 0;
-        // printf("message_len_bit[id_bit] --> %d\n", message_len_bit[id_bit]);
+        mask = ((unsigned long long)1) << val;
+        message_len_bit[val] = result->sha_base->length_bit & mask ? 1 : 0;
+        // printf("mask --> %d, message_len_bit[id_bit] --> %d, result->sha_base->length_bit --> %d a indice --> %d\n", mask, message_len_bit[val], result->sha_base->length_bit, val);
+        val++;
     }
 
     little_endian(message_len_bit, 64);
@@ -66,7 +69,7 @@ void sha256(struct sha256 *result)
         result->sha_base->process_message_bit = (uint8_t *)calloc(MEDIUM, sizeof(uint8_t));
         memcpy(result->sha_base->process_message_bit, bits_padding, LOW);
         memcpy(result->sha_base->process_message_bit + LOW, message_len_bit, LENGTH_MESSAGE);
-        chunks(result, MEDIUM);
+        chunks(result->sha_base, MEDIUM);
     }
     else if ((LOW <= result->sha_base->length_bit) && (result->sha_base->length_bit <= MEDIUM))
     {
@@ -78,7 +81,7 @@ void sha256(struct sha256 *result)
         memcpy(result->sha_base->process_message_bit, bits_padding, (HIGH - LENGTH_MESSAGE));
         memcpy(result->sha_base->process_message_bit + (HIGH - LENGTH_MESSAGE), message_len_bit, LENGTH_MESSAGE);
 
-        chunks(result, MEDIUM);
+        chunks(result->sha_base, MEDIUM);
     }
     else
     {
@@ -93,7 +96,7 @@ void sha256(struct sha256 *result)
         memcpy(result->sha_base->process_message_bit, bits_padding, length);
         memcpy(result->sha_base->process_message_bit + length, message_len_bit, LENGTH_MESSAGE);
 
-        chunks(result, MEDIUM);
+        chunks(result->sha_base, MEDIUM);
     }
 
     for (int id_K = 0; id_K < 64; id_K++)

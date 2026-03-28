@@ -8,7 +8,9 @@
 #define MEDIUM 512
 #define HIGH 1024
 #define LENGTH_MESSAGE 64
+#define LENGTH_MESSAGE_SHA512 128
 #define LENGTH_WORDS_SHA256 32
+#define LENGTH_WORDS_SHA512 64
 
 typedef struct
 {

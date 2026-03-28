@@ -13,34 +13,34 @@ uint8_t *padding(uint8_t *bits, int max_length, int amount)
     return bits_pad;
 }
 
-void char_to_bit(struct sha256 *input)
+void char_to_bit(Sha *input)
 {
-    input->sha_base->length = strlen(input->sha_base->input_word);
-    input->sha_base->length_bit = strlen(input->sha_base->input_word) * 8;
-    // printf("result.length_bit --> %d \n", input.length_bit);
-    input->sha_base->bits = (uint8_t *)calloc(input->sha_base->length_bit, sizeof(uint8_t));
+    input->length = strlen(input->input_word);
+    input->length_bit = strlen(input->input_word) * 8;
+    // printf("result.length_bit --> %d \n", input->length_bit);
+    input->bits = (uint8_t *)calloc(input->length_bit, sizeof(uint8_t));
 
-    for (int char_id = 0; char_id < input->sha_base->length; char_id++)
+    for (int char_id = 0; char_id < input->length; char_id++)
     {
-        char ch = input->sha_base->input_word[char_id];
+        char ch = input->input_word[char_id];
         for (int id_bit = 7; id_bit >= 0; id_bit--)
         {
             size_t index = (char_id * 8) + (7 - id_bit);       // indice
-            input->sha_base->bits[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
+            input->bits[index] = (ch & (1 << id_bit)) ? 1 : 0; // inserimenti bit
             // printf("%d\n", input.bit[(char_id * 8) + (7 - id_bit)]);
         }
         // printf("\n");
     }
 }
 
-void bit_to_hex(struct sha256 *bits)
+void bit_to_hex(Sha *bits)
 {
-    bits->sha_base->hex_length = bits->sha_base->length * 2;
+    bits->hex_length = bits->length * 2;
 
-    bits->sha_base->hex_value = (char *)calloc(bits->sha_base->hex_length + 1, sizeof(char));
+    bits->hex_value = (char *)calloc(bits->hex_length + 1, sizeof(char));
 
     size_t bit_id = 0;
-    for (size_t id_hex = 0; id_hex < bits->sha_base->hex_length; id_hex++)
+    for (size_t id_hex = 0; id_hex < bits->hex_length; id_hex++)
     {
 
         int int_hex = 0;
@@ -48,7 +48,7 @@ void bit_to_hex(struct sha256 *bits)
         for (int id_bit = 0; 3 >= id_bit; id_bit++)
         {
             // controllo se il bit è acceso
-            if (bits->sha_base->bits[bit_id])
+            if (bits->bits[bit_id])
             {
                 // accumulo spostando il bit
                 int_hex |= (1 << id_bit);
@@ -56,31 +56,31 @@ void bit_to_hex(struct sha256 *bits)
             bit_id++;
         }
         hex_value = (int_hex < 10) ? ('0' + int_hex) : ('a' + int_hex - 10);
-        bits->sha_base->hex_value[id_hex] = hex_value;
+        bits->hex_value[id_hex] = hex_value;
         // printf("value --> %c, value in int --> %d\n", hex_value, int_hex);
     }
 }
 
-void chunks(struct sha256 *word, int chunk_length)
+void chunks(Sha *word, int chunk_length)
 {
-    int amount_chunks = word->sha_base->length_bit / chunk_length; // calcolo quanti bit è composta la word
+    int amount_chunks = word->length_bit / chunk_length; // calcolo quanti bit è composta la word
     // int true_bit_words = word->length_bit;               // quantità corretta di bit delle parole
 
     if (amount_chunks == 0)
         amount_chunks = 1;
 
-    word->sha_base->Num_of_chunks = amount_chunks;
+    word->Num_of_chunks = amount_chunks;
 
-    word->sha_base->chunks_bits = (uint8_t **)calloc(amount_chunks, sizeof(uint8_t *)); // creazione di una matrice
+    word->chunks_bits = (uint8_t **)calloc(amount_chunks, sizeof(uint8_t *)); // creazione di una matrice
 
     for (int id_chunk = 0; id_chunk < amount_chunks; id_chunk++)
     {
-        word->sha_base->chunks_bits[id_chunk] = (uint8_t *)calloc(chunk_length + 1, sizeof(uint8_t)); // allocazione di ogni array di chunk
+        word->chunks_bits[id_chunk] = (uint8_t *)calloc(chunk_length + 1, sizeof(uint8_t)); // allocazione di ogni array di chunk
 
         // printf("chunk --> %d \n\n", amount_chunks);
         for (int id_bit = 0; id_bit < chunk_length; id_bit++)
         {
-            word->sha_base->chunks_bits[id_chunk][id_bit] = word->sha_base->process_message_bit[id_bit + (id_chunk * chunk_length)];
+            word->chunks_bits[id_chunk][id_bit] = word->process_message_bit[id_bit + (id_chunk * chunk_length)];
 
             // printf("bit_id --> %d, bit --> %d \n", id_bit + (id_chunk * chunk_length), word->chunks_bits[id_chunk][id_bit]);
         }
