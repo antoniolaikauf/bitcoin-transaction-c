@@ -72,7 +72,6 @@ struct sha512
 struct Random_num
 {
     uint32_t seed;
-    int number;
 
     int state_index;
     uint32_t state[N];
