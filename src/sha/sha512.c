@@ -143,12 +143,12 @@ void sha512(struct sha512 *input)
         {
             uint64_t *s0 = XORXOR_ARRAY_uint64_t(rotr_arr_uint64_t(Words[id_words - 15], 1, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(Words[id_words - 15], 8, LENGTH_WORDS_SHA512), shift_arr_right_uint64_t(Words[id_words - 15], 7, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
             uint64_t *s1 = XORXOR_ARRAY_uint64_t(rotr_arr_uint64_t(Words[id_words - 2], 19, LENGTH_WORDS_SHA512), rotr_arr_uint64_t(Words[id_words - 2], 61, LENGTH_WORDS_SHA512), shift_arr_right_uint64_t(Words[id_words - 2], 6, LENGTH_WORDS_SHA512), LENGTH_WORDS_SHA512);
-            uint64_t *W = adder(adder(adder(Words[id_words - 16], s0, LENGTH_WORDS_SHA512), Words[id_words - 7], LENGTH_WORDS_SHA512), s1, LENGTH_WORDS_SHA512);
-            memcpy(Words[id_words], W, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
+            uint64_t *w = adder(adder(adder(Words[id_words - 16], s0, LENGTH_WORDS_SHA512), Words[id_words - 7], LENGTH_WORDS_SHA512), s1, LENGTH_WORDS_SHA512);
+            memcpy(Words[id_words], w, sizeof(uint64_t) * LENGTH_WORDS_SHA512);
 
             free(s0);
             free(s1);
-            free(W);
+            free(w);
         }
 
         uint64_t a[LENGTH_WORDS_SHA512], b[LENGTH_WORDS_SHA512], c[LENGTH_WORDS_SHA512], d[LENGTH_WORDS_SHA512], e[LENGTH_WORDS_SHA512], f[LENGTH_WORDS_SHA512], g[LENGTH_WORDS_SHA512], h[LENGTH_WORDS_SHA512];
