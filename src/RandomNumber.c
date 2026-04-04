@@ -1,5 +1,17 @@
 #include "Global.h"
 
+/*
+ALGORITMO Mersenne_Twister
+
+Questo algoritmo prima di ripetere lo stesso numero servono 2 ** 19937
+
+inizializzazione dei numeri nella funzione init_state massimo numeri inizializzati in base al seed 624
+generazione del numero nella get_random_number
+si prendono due numeri dal state, si fanno operazioni di XOR o OR, si fa lo shift di un 1
+Se l’ultimo bit era 1, fai un XOR con A, si aggiorna la memoria cosi che ogni volta che si esegue la funzione
+cambia lo state 
+*/
+
 void init_state(struct Random_num *number)
 {
     number->state[0] = number->seed;
