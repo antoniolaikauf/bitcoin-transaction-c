@@ -56,7 +56,7 @@ uint64_t *adder(uint64_t *list1, uint64_t *list2, int len)
 void sha512(struct sha512 *input)
 {
     char_to_bit(input->sha_base);
-    bit_to_hex(input->sha_base);
+    // bit_to_hex(input->sha_base);
 
     // lunghezza in bit composta da 64
     uint8_t message_len_bit[LENGTH_MESSAGE_SHA512] = {0};

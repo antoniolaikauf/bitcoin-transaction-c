@@ -137,12 +137,12 @@ void sha256(struct sha256 *result)
         {
             uint32_t *s0 = XORXOR_ARRAY_uint32_t(rotr_arr_uint32_t(Words[id - 15], 7, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(Words[id - 15], 18, LENGTH_WORDS_SHA256), shift_arr_right_uint32_t(Words[id - 15], 3, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
             uint32_t *s1 = XORXOR_ARRAY_uint32_t(rotr_arr_uint32_t(Words[id - 2], 17, LENGTH_WORDS_SHA256), rotr_arr_uint32_t(Words[id - 2], 19, LENGTH_WORDS_SHA256), shift_arr_right_uint32_t(Words[id - 2], 10, LENGTH_WORDS_SHA256), LENGTH_WORDS_SHA256);
-            uint32_t *W = adder(adder(adder(Words[id - 16], s0, LENGTH_WORDS_SHA256), Words[id - 7], LENGTH_WORDS_SHA256), s1, LENGTH_WORDS_SHA256);
-            memcpy(Words[id], W, sizeof(uint32_t) * LENGTH_WORDS_SHA256);
+            uint32_t *w = adder(adder(adder(Words[id - 16], s0, LENGTH_WORDS_SHA256), Words[id - 7], LENGTH_WORDS_SHA256), s1, LENGTH_WORDS_SHA256);
+            memcpy(Words[id], w, sizeof(uint32_t) * LENGTH_WORDS_SHA256);
 
             free(s0);
             free(s1);
-            free(W);
+            free(w);
         }
 
         uint32_t a[32], b[32], c[32], d[32], e[32], f[32], g[32], h[32];
