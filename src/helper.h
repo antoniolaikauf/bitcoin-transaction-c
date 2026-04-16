@@ -114,15 +114,15 @@ void little_endian(uint8_t *array_bit, int len)
     }
 }
 
-#define DEFINE_XOR_ARRAY(type)                                                 \
-    type *XOR_ARRAY_##type(type i_array[], type j_array[], int length_wword)   \
-    {                                                                          \
-        type *ret = (type *)calloc(length_wword, length_wword * sizeof(type)); \
-        for (int id = 0; id < length_wword; id++)                              \
-        {                                                                      \
-            ret[id] = (i_array[id] + j_array[id]) % 2;                         \
-        }                                                                      \
-        return ret;                                                            \
+#define DEFINE_XOR_ARRAY(type)                                               \
+    type *XOR_ARRAY_##type(type i_array[], type j_array[], int length_word)  \
+    {                                                                        \
+        type *ret = (type *)calloc(length_word, length_word * sizeof(type)); \
+        for (int id = 0; id < length_word; id++)                             \
+        {                                                                    \
+            ret[id] = (i_array[id] + j_array[id]) % 2;                       \
+        }                                                                    \
+        return ret;                                                          \
     }
 #define DEFINE_XORXOR_ARRAY(type)                                                                    \
     type *XORXOR_ARRAY_##type(type i_array[], type j_array[], type l_array[], int length)            \
@@ -221,4 +221,15 @@ index 3
         type *ret = (type *)calloc(lenght_word, sizeof(type) * lenght_word); \
         memcpy(ret + index, array, (lenght_word - index) * sizeof(type));    \
         return ret;                                                          \
+    }
+
+#define DEFINE_OR(type)                                                 \
+    type *OR_ARRAY##type(type *i_array, type *j_array, int length)      \
+    {                                                                   \
+        type *ret = (type *)calloc(length, sizeof(type) * length);      \
+        for (int id_bit = 0; id_bit < length; id_bit++)                 \
+        {                                                               \
+            ret[id_bit] = (i_array[id_bit] || j_array[id_bit]) ? 1 : 0; \
+        }                                                               \
+        return ret;                                                     \
     }

@@ -13,6 +13,7 @@ DEFINE_XOR_ARRAY(uint32_t);
 DEFINE_XORXOR_ARRAY(uint32_t);
 DEFINE_AND_ARRAY(uint32_t);
 DEFINE_NOT_ARRAY(uint32_t);
+DEFINE_OR(uint32_t);
 
 uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 {
@@ -30,44 +31,51 @@ uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
     return sums;
 }
 
-uint32_t *function_chose(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d, uint32_t *e, uint32_t *state, int round, int rot)
+uint32_t *function_chose(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d, uint32_t *e, uint32_t *state, uint32_t *hash, int round, int rot)
 {
 
-    uint32_t *out = (uint32_t *)calloc(32, sizeof(uint32_t) * LENGTH_MESSAGE_RIMPED_160);
-    uint32_t *f = (uint32_t *)calloc(32, sizeof(uint32_t) * LENGTH_MESSAGE_RIMPED_160);
+    uint32_t *out = (uint32_t *)calloc(32, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
+    uint32_t *f = (uint32_t *)calloc(32, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
 
     switch (round)
     {
     case 0:
-        f = XORXOR_ARRAY_uint32_t(b, c, d, LENGTH_MESSAGE_RIMPED_160);
+        f = XORXOR_ARRAY_uint32_t(b, c, d, LENGTH_WORDS_RIMPED_160);
         break;
 
     case 1:
-        out = XOR_ARRAY_uint32_t(a, b, LENGTH_WORDS_RIMPED_160);
+
+        f = OR_ARRAYuint32_t(XOR_ARRAY_uint32_t(b, c, LENGTH_WORDS_RIMPED_160), XOR_ARRAY_uint32_t(NOT_ARRAY_uint32_t(b, LENGTH_WORDS_RIMPED_160), d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
+
         break;
 
     case 2:
-        out = XOR_ARRAY_uint32_t(a, b, LENGTH_WORDS_RIMPED_160);
+        f = XOR_ARRAY_uint32_t(d, OR_ARRAYuint32_t(b, NOT_ARRAY_uint32_t(c, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
         break;
 
     case 3:
-        out = XOR_ARRAY_uint32_t(a, b, LENGTH_WORDS_RIMPED_160);
+
+        f = OR_ARRAYuint32_t(XOR_ARRAY_uint32_t(b, c, LENGTH_WORDS_RIMPED_160), XOR_ARRAY_uint32_t(c, NOT_ARRAY_uint32_t(d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
         break;
 
     case 4:
-        out = XOR_ARRAY_uint32_t(a, b, LENGTH_WORDS_RIMPED_160);
+        f = XOR_ARRAY_uint32_t(b, OR_ARRAYuint32_t(c, NOT_ARRAY_uint32_t(d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
         break;
 
     default:
         break;
     }
 
-    uint32_t *temp1 = adder(a, f, LENGTH_WORDS_RIMPED_160);
-    uint32_t *temp2 = adder(state, temp1, LENGTH_WORDS_RIMPED_160);
-    uint32_t *temp3 = adder(temp2, Hash_bit[0], LENGTH_WORDS_RIMPED_160);
-    uint32_t *temp4 = rotr_arr_uint32_t(temp3, rot, LENGTH_WORDS_RIMPED_160);
-    uint32_t *temp5 = adder(temp4, e, LENGTH_WORDS_RIMPED_160);
+    uint32_t *temp1 = adder(a, f, LENGTH_WORDS_RIMPED_160);                   //  A + F
+    uint32_t *temp2 = adder(state, temp1, LENGTH_WORDS_RIMPED_160);           // TEMP1 + STATE
+    uint32_t *temp3 = adder(temp2, hash, LENGTH_WORDS_RIMPED_160);            // TEMP2 + HASH
+    uint32_t *temp4 = rotr_arr_uint32_t(temp3, rot, LENGTH_WORDS_RIMPED_160); // TEMP3 ROTAZIONE
+    uint32_t *temp5 = adder(temp4, e, LENGTH_WORDS_RIMPED_160);               // TEMP4 + E
     memcpy(out, temp5, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
+
+    // ROTAZIONE FISSA
+
+    c = rotr_arr_uint32_t(c, 10, LENGTH_WORDS_RIMPED_160); // C ROTAZIONE DI 10
 
     return out;
 }
@@ -157,7 +165,7 @@ void rimped_160(struct Rimped_160 *input)
             printf(" words --> %d\n", id_word);
         }
 
-        uint32_t a[32], b[32], c[32], d[32], e[32];
+        uint32_t a[32], b[32], c[32], d[32], e[32], aa[32], bb[32], cc[32], dd[32], ee[32];
 
         memcpy(a, Hash_bit[0], sizeof(uint32_t) * 32);
         memcpy(b, Hash_bit[1], sizeof(uint32_t) * 32);
@@ -165,27 +173,211 @@ void rimped_160(struct Rimped_160 *input)
         memcpy(d, Hash_bit[3], sizeof(uint32_t) * 32);
         memcpy(e, Hash_bit[4], sizeof(uint32_t) * 32);
 
-        memcpy(Words[0], function_chose(a, b, c, d, e, Words[0], 0, 11), sizeof(uint32_t) * 32);
-        memcpy(Words[1], function_chose(e, a, b, c, d, Words[1], 0, 14), sizeof(uint32_t) * 32);
-        memcpy(Words[2], function_chose(d, e, a, b, c, Words[2], 0, 15), sizeof(uint32_t) * 32);
-        memcpy(Words[3], function_chose(c, d, e, a, b, Words[3], 0, 12), sizeof(uint32_t) * 32);
-        memcpy(Words[4], function_chose(b, c, d, e, a, Words[4], 0, 5), sizeof(uint32_t) * 32);
-        memcpy(Words[5], function_chose(a, b, c, d, e, Words[5], 0, 8), sizeof(uint32_t) * 32);
-        memcpy(Words[6], function_chose(e, a, b, c, d, Words[6], 0, 7), sizeof(uint32_t) * 32);
-        memcpy(Words[7], function_chose(d, e, a, b, c, Words[7], 0, 9), sizeof(uint32_t) * 32);
-        memcpy(Words[8], function_chose(c, d, e, a, b, Words[8], 0, 11), sizeof(uint32_t) * 32);
-        memcpy(Words[9], function_chose(b, c, d, e, a, Words[9], 0, 13), sizeof(uint32_t) * 32);
-        memcpy(Words[10], function_chose(a, b, c, d, e, Words[10], 0, 14), sizeof(uint32_t) * 32);
-        memcpy(Words[11], function_chose(e, a, b, c, d, Words[11], 0, 15), sizeof(uint32_t) * 32);
-        memcpy(Words[12], function_chose(d, e, a, b, c, Words[12], 0, 6), sizeof(uint32_t) * 32);
-        memcpy(Words[13], function_chose(c, d, e, a, b, Words[13], 0, 7), sizeof(uint32_t) * 32);
-        memcpy(Words[14], function_chose(b, c, d, e, a, Words[14], 0, 9), sizeof(uint32_t) * 32);
-        memcpy(Words[15], function_chose(a, b, c, d, e, Words[15], 0, 8), sizeof(uint32_t) * 32);
+        /* Round 1 */
+        memcpy(a, function_chose(a, b, c, d, e, Words[0], Hash_bit[0], 0, 11), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[1], Hash_bit[0], 0, 14), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[2], Hash_bit[0], 0, 15), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[3], Hash_bit[0], 0, 12), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[4], Hash_bit[0], 0, 5), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[5], Hash_bit[0], 0, 8), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[6], Hash_bit[0], 0, 7), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[7], Hash_bit[0], 0, 9), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[8], Hash_bit[0], 0, 11), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[9], Hash_bit[0], 0, 13), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[10], Hash_bit[0], 0, 14), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[11], Hash_bit[0], 0, 15), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[12], Hash_bit[0], 0, 6), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[13], Hash_bit[0], 0, 7), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[14], Hash_bit[0], 0, 9), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[15], Hash_bit[0], 0, 8), sizeof(uint32_t) * 32);
+
+        /* Round 2 */
+        memcpy(e, function_chose(e, a, b, c, d, Words[7], Hash_bit[1], 1, 7), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[4], Hash_bit[1], 1, 6), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[13], Hash_bit[1], 1, 8), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(b, c, d, e, a, Words[1], Hash_bit[1], 1, 13), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[10], Hash_bit[1], 1, 11), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[6], Hash_bit[1], 1, 9), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[15], Hash_bit[1], 1, 7), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[3], Hash_bit[1], 1, 15), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(b, c, d, e, a, Words[12], Hash_bit[1], 1, 7), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[0], Hash_bit[1], 1, 12), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[9], Hash_bit[1], 1, 15), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[5], Hash_bit[1], 1, 9), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[2], Hash_bit[1], 1, 11), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(b, c, d, e, a, Words[14], Hash_bit[1], 1, 7), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[11], Hash_bit[1], 1, 13), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[8], Hash_bit[1], 1, 12), sizeof(uint32_t) * 32);
+
+        /* Round 3 */
+
+        memcpy(d, function_chose(d, e, a, b, c, Words[3], Hash_bit[2], 2, 11), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[10], Hash_bit[2], 2, 13), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[14], Hash_bit[2], 2, 6), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[4], Hash_bit[2], 2, 7), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[9], Hash_bit[2], 2, 14), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[15], Hash_bit[2], 2, 9), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[8], Hash_bit[2], 2, 13), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[1], Hash_bit[2], 2, 15), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[2], Hash_bit[2], 2, 14), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[7], Hash_bit[2], 2, 8), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[0], Hash_bit[2], 2, 13), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[6], Hash_bit[2], 2, 6), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[13], Hash_bit[2], 2, 5), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[11], Hash_bit[2], 2, 12), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[15], Hash_bit[2], 2, 7), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[12], Hash_bit[2], 2, 5), sizeof(uint32_t) * 32);
+
+        /* Round 4 */
+
+        memcpy(c, function_chose(d, e, a, b, c, Words[1], Hash_bit[3], 3, 11), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[9], Hash_bit[3], 3, 12), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(b, c, d, e, a, Words[11], Hash_bit[3], 3, 14), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(a, b, c, d, e, Words[10], Hash_bit[3], 3, 15), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(e, a, b, c, d, Words[0], Hash_bit[3], 3, 14), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(d, e, a, b, c, Words[8], Hash_bit[3], 3, 15), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[12], Hash_bit[3], 3, 9), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(b, c, d, e, a, Words[4], Hash_bit[3], 3, 8), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(a, b, c, d, e, Words[13], Hash_bit[3], 3, 9), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(e, a, b, c, d, Words[3], Hash_bit[3], 3, 14), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(d, e, a, b, c, Words[7], Hash_bit[3], 3, 5), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[15], Hash_bit[3], 3, 6), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(b, c, d, e, a, Words[14], Hash_bit[3], 3, 8), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(a, b, c, d, e, Words[5], Hash_bit[3], 3, 6), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(e, a, b, c, d, Words[6], Hash_bit[3], 3, 5), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(d, e, a, b, c, Words[2], Hash_bit[3], 3, 12), sizeof(uint32_t) * 32);
+
+        /* Round 4 */
+
+        memcpy(b, function_chose(d, e, a, b, c, Words[4], Hash_bit[4], 4, 9), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(c, d, e, a, b, Words[0], Hash_bit[4], 4, 15), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(b, c, d, e, a, Words[5], Hash_bit[4], 4, 5), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(a, b, c, d, e, Words[9], Hash_bit[4], 4, 11), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(e, a, b, c, d, Words[7], Hash_bit[4], 4, 6), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(d, e, a, b, c, Words[12], Hash_bit[4], 4, 8), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(c, d, e, a, b, Words[2], Hash_bit[4], 4, 13), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(b, c, d, e, a, Words[10], Hash_bit[4], 4, 12), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(a, b, c, d, e, Words[14], Hash_bit[4], 4, 5), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(e, a, b, c, d, Words[1], Hash_bit[4], 4, 12), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(d, e, a, b, c, Words[3], Hash_bit[4], 4, 13), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(c, d, e, a, b, Words[8], Hash_bit[4], 4, 14), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(b, c, d, e, a, Words[11], Hash_bit[4], 4, 11), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(a, b, c, d, e, Words[6], Hash_bit[4], 4, 8), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(e, a, b, c, d, Words[15], Hash_bit[4], 4, 5), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(d, e, a, b, c, Words[13], Hash_bit[4], 4, 6), sizeof(uint32_t) * 32);
+
+        memcpy(aa, a, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
+        memcpy(bb, b, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
+        memcpy(cc, c, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
+        memcpy(dd, d, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
+        memcpy(ee, e, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
+
+        memcpy(a, Hash_bit[0], sizeof(uint32_t) * 32);
+        memcpy(b, Hash_bit[1], sizeof(uint32_t) * 32);
+        memcpy(c, Hash_bit[2], sizeof(uint32_t) * 32);
+        memcpy(d, Hash_bit[3], sizeof(uint32_t) * 32);
+        memcpy(e, Hash_bit[4], sizeof(uint32_t) * 32);
+
+        /* Round 1 */
+        memcpy(a, function_chose(a, b, c, d, e, Words[5], Hash_bit[5], 4, 8), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[14], Hash_bit[5], 4, 9), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[7], Hash_bit[5], 4, 9), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[0], Hash_bit[5], 4, 11), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[9], Hash_bit[5], 4, 13), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[2], Hash_bit[5], 4, 15), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[11], Hash_bit[5], 4, 15), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[4], Hash_bit[5], 4, 5), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[13], Hash_bit[5], 4, 7), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[6], Hash_bit[5], 4, 7), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[15], Hash_bit[5], 4, 8), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[8], Hash_bit[5], 4, 11), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[1], Hash_bit[5], 4, 14), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[10], Hash_bit[5], 4, 14), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[3], Hash_bit[5], 4, 12), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[12], Hash_bit[5], 4, 6), sizeof(uint32_t) * 32);
+
+        /* Round 2 */
+        memcpy(e, function_chose(e, a, b, c, d, Words[6], Hash_bit[6], 3, 9), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[11], Hash_bit[6], 3, 13), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[3], Hash_bit[6], 3, 15), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(b, c, d, e, a, Words[7], Hash_bit[6], 3, 7), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[0], Hash_bit[6], 3, 12), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[13], Hash_bit[6], 3, 8), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[5], Hash_bit[6], 3, 9), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[10], Hash_bit[6], 3, 11), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(b, c, d, e, a, Words[14], Hash_bit[6], 3, 7), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[15], Hash_bit[6], 3, 7), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[8], Hash_bit[6], 3, 12), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[12], Hash_bit[6], 3, 7), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[4], Hash_bit[6], 3, 6), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(b, c, d, e, a, Words[9], Hash_bit[6], 3, 15), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[1], Hash_bit[6], 3, 13), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[2], Hash_bit[6], 3, 11), sizeof(uint32_t) * 32);
+
+        /* Round 3 */
+
+        memcpy(d, function_chose(d, e, a, b, c, Words[15], Hash_bit[7], 2, 9), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[5], Hash_bit[7], 2, 7), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[1], Hash_bit[7], 2, 15), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[3], Hash_bit[7], 2, 11), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[7], Hash_bit[7], 2, 8), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[14], Hash_bit[7], 2, 6), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[6], Hash_bit[7], 2, 6), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[9], Hash_bit[7], 2, 14), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[11], Hash_bit[7], 2, 12), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[8], Hash_bit[7], 2, 13), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[12], Hash_bit[7], 2, 5), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(c, d, e, a, b, Words[2], Hash_bit[7], 2, 14), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(b, c, d, e, a, Words[10], Hash_bit[7], 2, 13), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(a, b, c, d, e, Words[0], Hash_bit[7], 2, 13), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(e, a, b, c, d, Words[4], Hash_bit[7], 2, 7), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(d, e, a, b, c, Words[13], Hash_bit[7], 2, 5), sizeof(uint32_t) * 32);
+
+        /* Round 4 */
+
+        memcpy(c, function_chose(d, e, a, b, c, Words[8], Hash_bit[8], 1, 15), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[6], Hash_bit[8], 1, 5), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(b, c, d, e, a, Words[4], Hash_bit[8], 1, 8), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(a, b, c, d, e, Words[1], Hash_bit[8], 1, 11), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(e, a, b, c, d, Words[3], Hash_bit[8], 1, 14), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(d, e, a, b, c, Words[11], Hash_bit[8], 1, 14), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[15], Hash_bit[8], 1, 6), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(b, c, d, e, a, Words[0], Hash_bit[8], 1, 14), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(a, b, c, d, e, Words[5], Hash_bit[8], 1, 6), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(e, a, b, c, d, Words[12], Hash_bit[8], 1, 9), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(d, e, a, b, c, Words[2], Hash_bit[8], 1, 12), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(c, d, e, a, b, Words[13], Hash_bit[8], 1, 9), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(b, c, d, e, a, Words[9], Hash_bit[8], 1, 12), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(a, b, c, d, e, Words[7], Hash_bit[8], 1, 5), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(e, a, b, c, d, Words[10], Hash_bit[8], 1, 15), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(d, e, a, b, c, Words[14], Hash_bit[8], 1, 8), sizeof(uint32_t) * 32);
+
+        /* Round 4 */
+
+        memcpy(b, function_chose(d, e, a, b, c, Words[12], Hash_bit[9], 0, 8), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(c, d, e, a, b, Words[15], Hash_bit[9], 0, 5), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(b, c, d, e, a, Words[10], Hash_bit[9], 0, 12), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(a, b, c, d, e, Words[4], Hash_bit[9], 0, 9), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(e, a, b, c, d, Words[1], Hash_bit[9], 0, 12), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(d, e, a, b, c, Words[5], Hash_bit[9], 0, 5), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(c, d, e, a, b, Words[8], Hash_bit[9], 0, 14), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(b, c, d, e, a, Words[7], Hash_bit[9], 0, 6), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(a, b, c, d, e, Words[6], Hash_bit[9], 0, 8), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(e, a, b, c, d, Words[2], Hash_bit[9], 0, 13), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(d, e, a, b, c, Words[13], Hash_bit[9], 0, 6), sizeof(uint32_t) * 32);
+        memcpy(a, function_chose(c, d, e, a, b, Words[14], Hash_bit[9], 0, 5), sizeof(uint32_t) * 32);
+        memcpy(e, function_chose(b, c, d, e, a, Words[0], Hash_bit[9], 0, 15), sizeof(uint32_t) * 32);
+        memcpy(d, function_chose(a, b, c, d, e, Words[3], Hash_bit[9], 0, 13), sizeof(uint32_t) * 32);
+        memcpy(c, function_chose(e, a, b, c, d, Words[9], Hash_bit[9], 0, 11), sizeof(uint32_t) * 32);
+        memcpy(b, function_chose(d, e, a, b, c, Words[11], Hash_bit[9], 0, 11), sizeof(uint32_t) * 32);
+
+
+        
 
         printf("\n");
-        for (size_t i = 0; i < 32; i++)
+        for (size_t i = 0; i < 3; i++)
         {
-            printf("%d", Words[0][i]);
+            printf("%d", a[i]);
         }
         printf("\n");
     }

@@ -8,18 +8,27 @@
 // CRYPTOGRAFIA
 // --------------------------------
 
+// sha256
 #define LOW 448
 #define MEDIUM 512
 #define HIGH 1024
 #define LENGTH_MESSAGE 64
 #define LENGTH_WORDS_SHA256 32
 
+// sha512
 #define LOW_SHA512 896
 #define MEDIUM_SHA512 1024
 #define HIGH_SHA512 2048
 #define LENGTH_MESSAGE_SHA512 128
 #define LENGTH_WORDS_SHA512 64
 
+// rimped-160
+
+#define LENGTH_WORDS_RIMPED_160 32
+#define LENGTH_MESSAGE_RIMPED_160 64
+#define LOW_RIMPED_160 448
+#define MEDIUM_RIMPED_160 512
+#define HIGH_RIMPED_160 1024
 // --------------------------------
 // NUMERI RANDOM
 // --------------------------------
@@ -67,6 +76,13 @@ struct sha512
 {
     Sha *sha_base;
     char digest[129]; // output
+};
+
+struct Rimped_160
+{
+    Sha *sha_base;
+    int counter;
+    char digest[40];
 };
 
 struct Random_num
