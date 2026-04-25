@@ -213,8 +213,38 @@ questo avviene rompendo l'array in due parti per poi ricomporlo
 metodo che viene usato per shiftare un array a destra in base a index
 es.
 index 3
-[1,2,3,4,5] --> [0,0,0,1,2]
+[1,2,3,4,5] --> [3,4,5,1,2]
 */
+
+#define DEFINE_ROL(type)                                               \
+    type *rol_arr_##type(type array[], int index, int length)          \
+    {                                                                  \
+        if (length <= 0)                                               \
+            return NULL;                                               \
+        index = index % length;                                        \
+                                                                       \
+        type *ret = (type *)calloc(length, sizeof(type));              \
+        type *first = (type *)calloc(length - index, sizeof(type));    \
+        type *second = (type *)calloc(index, sizeof(type));            \
+                                                                       \
+        /* LEFT rotate: primi 'index' elementi vanno in fondo */       \
+        memcpy(first, array + index, (length - index) * sizeof(type)); \
+        memcpy(second, array, index * sizeof(type));                   \
+                                                                       \
+        memcpy(ret, first, (length - index) * sizeof(type));           \
+        memcpy(ret + (length - index), second, index * sizeof(type));  \
+                                                                       \
+        free(first);                                                   \
+        free(second);                                                  \
+        return ret;                                                    \
+    }
+/*
+metodo che viene usato per shiftare un array a sinistra in base a index
+es.
+index 3
+[1,2,3,4,5] --> [4,5,1,2,3]
+*/
+
 #define DEFINE_SHIFT(type)                                                   \
     type *shift_arr_right_##type(type array[], int index, int lenght_word)   \
     {                                                                        \
@@ -233,3 +263,10 @@ index 3
         }                                                               \
         return ret;                                                     \
     }
+
+uint32_t *copy_array(uint32_t *src, int len)
+{
+    uint32_t *dst = (uint32_t *)calloc(len, sizeof(uint32_t));
+    memcpy(dst, src, sizeof(uint32_t) * len);
+    return dst;
+}

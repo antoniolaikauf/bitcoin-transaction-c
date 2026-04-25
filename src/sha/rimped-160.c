@@ -7,6 +7,46 @@ uint32_t Hash_bit[5][LENGTH_WORDS_RIMPED_160] = {0};
 uint32_t Key[10] = {0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E, 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000};
 uint32_t Key_bit[10][LENGTH_WORDS_RIMPED_160] = {0};
 
+/* ====================== TABELLE PER LA LINEA LEFT (RIPEMD-160) ====================== */
+
+// Rotazioni per linea LEFT (80 valori)
+int s_left[80] = {
+    11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8, // round 1
+    7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12, // round 2
+    11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5, // round 3
+    11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12, // round 4
+    9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6  // round 5
+};
+
+// Permutazione dei Words per linea LEFT (indici 0..15 ripetuti)
+int r_left[80] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, // round 1
+    7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8, // round 2
+    3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12, // round 3
+    1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2, // round 4
+    4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13  // round 5
+};
+
+/* ====================== TABELLE PER LA LINEA RIGHT (RIPEMD-160) ====================== */
+
+/* s_right è IDENTICA a s_left (stessa tabella di rotazioni) */
+int s_right[80] = {
+    11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8, /* round 1 */
+    7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12, /* round 2 */
+    11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5, /* round 3 */
+    11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12, /* round 4 */
+    9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6  /* round 5 */
+};
+
+/* r_right → permutazione degli indici dei Words per la linea RIGHT */
+int r_right[80] = {
+    5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12, /* round 1 */
+    6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2, /* round 2 */
+    15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13, /* round 3 */
+    8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14, /* round 4 */
+    12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11  /* round 5 */
+};
+
 DEFINE_ROTR(uint32_t);
 DEFINE_SHIFT(uint32_t);
 DEFINE_XOR_ARRAY(uint32_t);
@@ -14,6 +54,7 @@ DEFINE_XORXOR_ARRAY(uint32_t);
 DEFINE_AND_ARRAY(uint32_t);
 DEFINE_NOT_ARRAY(uint32_t);
 DEFINE_OR(uint32_t);
+DEFINE_ROL(uint32_t);
 
 uint32_t *adder(uint32_t *list1, uint32_t *list2, int len)
 {
@@ -40,25 +81,28 @@ uint32_t *function_chose(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d, uin
     switch (round)
     {
     case 0:
+        // b ^ c ^ d
         f = XORXOR_ARRAY_uint32_t(b, c, d, LENGTH_WORDS_RIMPED_160);
         break;
 
     case 1:
-
-        f = OR_ARRAYuint32_t(XOR_ARRAY_uint32_t(b, c, LENGTH_WORDS_RIMPED_160), XOR_ARRAY_uint32_t(NOT_ARRAY_uint32_t(b, LENGTH_WORDS_RIMPED_160), d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
-
+        // (b & c) | ((~b) & z)
+        f = OR_ARRAYuint32_t(XOR_ARRAY_uint32_t(b, c, LENGTH_WORDS_RIMPED_160), AND_ARRAY_uint32_t(NOT_ARRAY_uint32_t(b, LENGTH_WORDS_RIMPED_160), d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
         break;
 
     case 2:
+        // (b | (~c)) ^ d
         f = XOR_ARRAY_uint32_t(d, OR_ARRAYuint32_t(b, NOT_ARRAY_uint32_t(c, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
         break;
 
     case 3:
-
-        f = OR_ARRAYuint32_t(XOR_ARRAY_uint32_t(b, c, LENGTH_WORDS_RIMPED_160), XOR_ARRAY_uint32_t(c, NOT_ARRAY_uint32_t(d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
+        // (x & z) | ((~z) & y)
+        f = OR_ARRAYuint32_t(AND_ARRAY_uint32_t(b, d, LENGTH_WORDS_RIMPED_160), AND_ARRAY_uint32_t(c, NOT_ARRAY_uint32_t(d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
         break;
 
     case 4:
+
+        // x ^ (y | (~z)
         f = XOR_ARRAY_uint32_t(b, OR_ARRAYuint32_t(c, NOT_ARRAY_uint32_t(d, LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160), LENGTH_WORDS_RIMPED_160);
         break;
 
@@ -66,11 +110,12 @@ uint32_t *function_chose(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d, uin
         break;
     }
 
-    uint32_t *temp1 = adder(a, f, LENGTH_WORDS_RIMPED_160);                   //  A + F
-    uint32_t *temp2 = adder(state, temp1, LENGTH_WORDS_RIMPED_160);           // TEMP1 + STATE
-    uint32_t *temp3 = adder(temp2, hash, LENGTH_WORDS_RIMPED_160);            // TEMP2 + HASH
-    uint32_t *temp4 = rotr_arr_uint32_t(temp3, rot, LENGTH_WORDS_RIMPED_160); // TEMP3 ROTAZIONE
-    uint32_t *temp5 = adder(temp4, e, LENGTH_WORDS_RIMPED_160);               // TEMP4 + E
+    // calcolo corretto di T = (A + f + X + K) <<< s + E
+    uint32_t *temp1 = adder(a, f, LENGTH_WORDS_RIMPED_160);                  // A + f
+    uint32_t *temp2 = adder(state, temp1, LENGTH_WORDS_RIMPED_160);          // + X
+    uint32_t *temp3 = adder(temp2, hash, LENGTH_WORDS_RIMPED_160);           // + K
+    uint32_t *temp4 = rol_arr_uint32_t(temp3, rot, LENGTH_WORDS_RIMPED_160); // <<< rot
+    uint32_t *temp5 = adder(temp4, e, LENGTH_WORDS_RIMPED_160);              // + E
     memcpy(out, temp5, sizeof(uint32_t) * LENGTH_WORDS_RIMPED_160);
 
     // ROTAZIONE FISSA
