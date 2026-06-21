@@ -219,7 +219,7 @@ void sha256(struct sha256 *result)
 }
 
 // test
-int main()
+/*int main()
 {
     struct sha256 result;
     result.sha_base = (Sha *)calloc(1, sizeof(Sha));
@@ -231,3 +231,4 @@ int main()
     printf("\n");
     return 0;
 }
+    */

@@ -462,3 +462,5 @@ int main()
 
     return 0;
 }
+
+// https://homes.esat.kuleuven.be/~bosselae/ripemd160.html#What
